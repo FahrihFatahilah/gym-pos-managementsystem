@@ -2,7 +2,7 @@
 
 # Wait for database to be ready
 echo "Waiting for MySQL to be ready..."
-while ! nc -z mysql 3306; do
+while ! php -r "new PDO('mysql:host=mysql;port=3306', 'root', 'password');" 2>/dev/null; do
   sleep 1
 done
 echo "MySQL is ready!"
