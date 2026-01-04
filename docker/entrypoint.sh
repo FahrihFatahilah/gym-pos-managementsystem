@@ -1,6 +1,13 @@
 #!/bin/bash
 
-# Wait for database to be ready (if using external DB)
+# Wait for database to be ready
+echo "Waiting for MySQL to be ready..."
+while ! nc -z mysql 3306; do
+  sleep 1
+done
+echo "MySQL is ready!"
+
+# Setup Laravel application
 echo "Setting up Laravel application..."
 
 # Generate app key if not exists
@@ -10,11 +17,6 @@ fi
 
 # Generate application key
 php artisan key:generate --force
-
-# Create SQLite database if not exists
-if [ ! -f /var/www/database/database.sqlite ]; then
-    touch /var/www/database/database.sqlite
-fi
 
 # Run migrations
 php artisan migrate --force
