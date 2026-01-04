@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gym-pos-app
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./storage:/var/www/storage
+      - ./database:/var/www/database
+      - ./public/storage:/var/www/public/storage
+    environment:
+      - APP_ENV=production
+      - APP_DEBUG=false
+      - DB_CONNECTION=sqlite
+      - DB_DATABASE=/var/www/database/database.sqlite
+    networks:
+      - gym-pos-network
+
+networks:
+  gym-pos-network:
+    driver: bridge
+
+volumes:
+  gym-pos-storage:
+  gym-pos-database:
