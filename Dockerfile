@@ -16,6 +16,7 @@ RUN apt-get update && apt-get install -y \
     supervisor \
     libzip-dev \
     netcat-openbsd \
+    nano \
     netcat-openbsd
 
 # Clear cache

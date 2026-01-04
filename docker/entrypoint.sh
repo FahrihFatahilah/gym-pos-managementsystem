@@ -12,7 +12,20 @@ echo "Setting up Laravel application..."
 
 # Generate app key if not exists
 if [ ! -f /var/www/.env ]; then
-    cp /var/www/.env.example /var/www/.env
+    if [ -f /var/www/.env.example ]; then
+        cp /var/www/.env.example /var/www/.env
+    else
+        echo "APP_NAME=Laravel" > /var/www/.env
+        echo "APP_ENV=local" >> /var/www/.env
+        echo "APP_DEBUG=true" >> /var/www/.env
+        echo "APP_URL=http://localhost" >> /var/www/.env
+        echo "DB_CONNECTION=mysql" >> /var/www/.env
+        echo "DB_HOST=mysql" >> /var/www/.env
+        echo "DB_PORT=3306" >> /var/www/.env
+        echo "DB_DATABASE=gym_pos" >> /var/www/.env
+        echo "DB_USERNAME=root" >> /var/www/.env
+        echo "DB_PASSWORD=password" >> /var/www/.env
+    fi
 fi
 
 # Generate application key
