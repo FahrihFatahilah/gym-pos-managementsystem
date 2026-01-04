@@ -2,7 +2,7 @@
 
 # Wait for database to be ready
 echo "Waiting for MySQL to be ready..."
-while ! php -r "new PDO('mysql:host=mysql;port=3306', 'root', 'password');" 2>/dev/null; do
+while ! timeout 1 bash -c "</dev/tcp/mysql/3306" 2>/dev/null; do
   sleep 1
 done
 echo "MySQL is ready!"
