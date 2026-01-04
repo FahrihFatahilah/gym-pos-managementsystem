@@ -34,7 +34,7 @@ COPY . /var/www
 COPY --chown=www-data:www-data . /var/www
 
 # Install dependencies
-RUN composer install --optimize-autoloader --no-dev
+RUN composer install --optimize-autoloader --no-dev --ignore-platform-reqs
 
 # Copy nginx config
 COPY docker/nginx.conf /etc/nginx/sites-available/default
