@@ -17,14 +17,15 @@ if [ ! -f /var/www/.env ]; then
     else
         echo "APP_NAME=Laravel" > /var/www/.env
         echo "APP_ENV=local" >> /var/www/.env
+        echo "APP_KEY=" >> /var/www/.env
         echo "APP_DEBUG=true" >> /var/www/.env
         echo "APP_URL=http://localhost" >> /var/www/.env
         echo "DB_CONNECTION=mysql" >> /var/www/.env
         echo "DB_HOST=mysql" >> /var/www/.env
         echo "DB_PORT=3306" >> /var/www/.env
         echo "DB_DATABASE=gym_pos" >> /var/www/.env
-        echo "DB_USERNAME=root" >> /var/www/.env
-        echo "DB_PASSWORD=password" >> /var/www/.env
+        echo "DB_USERNAME=gym_user" >> /var/www/.env
+        echo "DB_PASSWORD=gym_password" >> /var/www/.env
     fi
 fi
 
