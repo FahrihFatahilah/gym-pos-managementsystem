@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\DailyUser;
+use App\Models\Member;
 use App\Models\GymSetting;
 use App\Models\PersonalTrainer;
 use Illuminate\Http\Request;
@@ -29,7 +30,31 @@ class DailyUserController extends Controller
 
     public function create()
     {
-        return view('daily-users.create');
+        $personalTrainers = \App\Models\PersonalTrainer::where('is_active', true)->get();
+        return view('daily-users.create', compact('personalTrainers'));
+    }
+
+    public function checkHistory(Request $request)
+    {
+        $phone = $request->phone;
+        
+        // Cek history daily users
+        $dailyHistory = DailyUser::where('phone', $phone)
+            ->with('personalTrainer')
+            ->orderBy('visit_date', 'desc')
+            ->get();
+        
+        // Cek history membership
+        $memberHistory = Member::where('phone', $phone)
+            ->with(['memberships' => function($query) {
+                $query->orderBy('created_at', 'desc');
+            }])
+            ->first();
+        
+        return response()->json([
+            'daily_history' => $dailyHistory,
+            'member_history' => $memberHistory
+        ]);
     }
 
     public function store(Request $request)

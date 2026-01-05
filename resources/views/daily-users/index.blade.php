@@ -55,7 +55,7 @@
                             <tbody>
                                 @foreach($dailyUsers as $user)
                                     <tr>
-                                        <td>{{ $user->visit_date->format('d/m/Y') }}</td>
+                                        <td>{{ formatTanggal($user->visit_date) }}</td>
                                         <td><strong>{{ $user->name }}</strong></td>
                                         <td>
                                             <div>{{ $user->phone }}</div>

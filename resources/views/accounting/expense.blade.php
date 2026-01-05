@@ -132,7 +132,7 @@
                             <tbody>
                                 @foreach($expenses as $expense)
                                     <tr>
-                                        <td>{{ $expense->expense_date->format('d/m/Y') }}</td>
+                                        <td>{{ formatTanggal($expense->expense_date) }}</td>
                                         <td>
                                             <strong>{{ $expense->description }}</strong>
                                             @if($expense->notes)

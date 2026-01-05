@@ -1,42 +1,22 @@
 <?php
 
-if (!function_exists('gymSettings')) {
-    /**
-     * Get gym settings
-     */
-    function gymSettings()
-    {
-        return App\Models\GymSetting::getSettings();
-    }
-}
-
-if (!function_exists('formatPrice')) {
-    /**
-     * Format price with currency
-     */
-    function formatPrice($amount)
-    {
-        $settings = gymSettings();
-        return $settings->formatPrice($amount);
-    }
-}
-
-if (!function_exists('gymName')) {
-    /**
-     * Get gym name
-     */
-    function gymName()
-    {
-        return gymSettings()->gym_name;
-    }
-}
-
-if (!function_exists('gymLogo')) {
-    /**
-     * Get gym logo URL
-     */
-    function gymLogo()
-    {
-        return gymSettings()->logo_url;
+if (!function_exists('formatTanggal')) {
+    function formatTanggal($date, $withTime = false) {
+        if (!$date) return '-';
+        
+        $bulan = [
+            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+        ];
+        
+        $carbon = \Carbon\Carbon::parse($date);
+        $format = $carbon->day . ' ' . $bulan[$carbon->month] . ' ' . $carbon->year;
+        
+        if ($withTime) {
+            $format .= ' ' . $carbon->format('H:i');
+        }
+        
+        return $format;
     }
 }

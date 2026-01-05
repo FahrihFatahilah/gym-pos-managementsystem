@@ -37,7 +37,7 @@
                             </div>
                             <small class="text-muted">
                                 <i class="fas fa-calendar-alt"></i>
-                                Bergabung {{ $member->created_at->format('d M Y') }}
+                                Bergabung {{ formatTanggal($member->created_at) }}
                             </small>
                         </div>
                     </div>
@@ -105,7 +105,7 @@
                                     </div>
                                     <div class="membership-period">
                                         <i class="fas fa-calendar"></i>
-                                        {{ $membership->start_date->format('d/m/Y') }} - {{ $membership->end_date->format('d/m/Y') }}
+                                        {{ formatTanggal($membership->start_date) }} - {{ formatTanggal($membership->end_date) }}
                                     </div>
                                     <div class="membership-price">
                                         <i class="fas fa-tag"></i>

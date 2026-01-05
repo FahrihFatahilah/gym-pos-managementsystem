@@ -68,7 +68,7 @@
                                         @if($member->activeMembership)
                                             <div class="membership-active">
                                                 <i class="fas fa-calendar-check"></i>
-                                                <span>Berakhir {{ $member->activeMembership->end_date->format('d/m/Y') }}</span>
+                                                <span>Berakhir {{ formatTanggal($member->activeMembership->end_date) }}</span>
                                             </div>
                                         @else
                                             <div class="membership-inactive">

@@ -39,8 +39,8 @@
                                             {{ $membership->getTypeLabel() }}
                                         </span>
                                     </td>
-                                    <td>{{ $membership->start_date->format('d/m/Y') }}</td>
-                                    <td>{{ $membership->end_date->format('d/m/Y') }}</td>
+                                    <td>{{ formatTanggal($membership->start_date) }}</td>
+                                    <td>{{ formatTanggal($membership->end_date) }}</td>
                                     <td>Rp {{ number_format($membership->price, 0, ',', '.') }}</td>
                                     <td>
                                         <span class="badge bg-{{ $membership->status === 'active' ? 'success' : 'danger' }}">

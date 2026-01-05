@@ -99,6 +99,7 @@ Route::middleware(['auth', 'redirect.pt'])->group(function () {
         Route::delete('/settings/remove-favicon', [App\Http\Controllers\SettingController::class, 'removeFavicon'])->name('settings.remove-favicon');
         
         Route::resource('daily-users', App\Http\Controllers\DailyUserController::class);
+        Route::post('daily-users/check-history', [App\Http\Controllers\DailyUserController::class, 'checkHistory'])->name('daily-users.check-history');
         Route::resource('personal-trainers', App\Http\Controllers\PersonalTrainerController::class);
         
         // Branch Management

@@ -99,7 +99,7 @@
             </div>
             <div>
                 <span>Tanggal:</span>
-                <span>{{ $transaction->created_at->format('d/m/Y H:i') }}</span>
+                <span>{{ formatTanggal($transaction->created_at, true) }}</span>
             </div>
             <div>
                 <span>Kasir:</span>
@@ -150,7 +150,7 @@
                 <p>Terima kasih atas kunjungan Anda!</p>
                 <p>Semoga sehat selalu</p>
             @endif
-            <p>{{ now()->format('d/m/Y H:i:s') }}</p>
+            <p>{{ formatTanggal(now(), true) }}</p>
         </div>
     </div>
 </body>

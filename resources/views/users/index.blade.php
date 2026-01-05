@@ -74,7 +74,7 @@
                                         </span>
                                     </td>
                                     <td>{{ $user->branch ? $user->branch->name : '-' }}</td>
-                                    <td>{{ $user->created_at->format('d/m/Y') }}</td>
+                                    <td>{{ formatTanggal($user->created_at) }}</td>
                                     <td>
                                         <div class="btn-group" role="group">
                                             <a href="{{ route('users.show', $user) }}" 

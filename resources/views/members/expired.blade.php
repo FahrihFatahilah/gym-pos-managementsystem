@@ -43,7 +43,7 @@
                                     </td>
                                     <td>
                                         @if($member->memberships->first())
-                                            {{ $member->memberships->first()->end_date->format('d/m/Y') }}
+                                            {{ formatTanggal($member->memberships->first()->end_date) }}
                                         @else
                                             -
                                         @endif

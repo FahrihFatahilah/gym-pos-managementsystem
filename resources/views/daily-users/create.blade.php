@@ -24,8 +24,13 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="phone" class="form-label">Nomor HP <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control @error('phone') is-invalid @enderror" 
-                                       id="phone" name="phone" value="{{ old('phone') }}" required>
+                                <div class="input-group">
+                                    <input type="text" class="form-control @error('phone') is-invalid @enderror" 
+                                           id="phone" name="phone" value="{{ old('phone') }}" required>
+                                    <button type="button" class="btn btn-outline-info" id="checkHistory" style="transition: none;">
+                                        <i class="fas fa-history"></i> Cek History
+                                    </button>
+                                </div>
                                 @error('phone')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -39,6 +44,19 @@
                                 @error('email')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- History Modal -->
+                    <div id="historyModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1050;">
+                        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border-radius: 8px; width: 90%; max-width: 800px; max-height: 80vh; overflow-y: auto;">
+                            <div style="padding: 20px; border-bottom: 1px solid #dee2e6; display: flex; justify-content: space-between; align-items: center;">
+                                <h5 style="margin: 0;">History Kunjungan</h5>
+                                <button type="button" onclick="document.getElementById('historyModal').style.display='none'" style="background: none; border: none; font-size: 24px; cursor: pointer;">&times;</button>
+                            </div>
+                            <div id="historyContent" style="padding: 20px;">
+                                <!-- Content loaded here -->
                             </div>
                         </div>
                     </div>
@@ -162,6 +180,74 @@ $(document).ready(function() {
         } else {
             $('#pt-cost').hide();
         }
+    });
+    
+    // Check history functionality
+    $('#checkHistory').on('click', function() {
+        const phone = $('#phone').val();
+        if (!phone) {
+            alert('Masukkan nomor HP terlebih dahulu');
+            return;
+        }
+        
+        const $btn = $(this);
+        $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Loading...');
+        
+        $.ajax({
+            url: '{{ route("daily-users.check-history") }}',
+            method: 'POST',
+            data: {
+                phone: phone,
+                _token: $('meta[name="csrf-token"]').attr('content')
+            },
+            success: function(response) {
+                let content = '<div class="row">';
+                
+                // Daily History
+                content += '<div class="col-md-6"><h6>History Daily Gym</h6>';
+                if (response.daily_history && response.daily_history.length > 0) {
+                    content += '<table class="table table-sm">';
+                    content += '<thead><tr><th>Tanggal</th><th>Bayar</th><th>PT</th></tr></thead><tbody>';
+                    response.daily_history.forEach(function(item) {
+                        const pt = item.personal_trainer ? item.personal_trainer.name : '-';
+                        content += `<tr><td>${item.visit_date}</td><td>Rp ${parseInt(item.amount_paid).toLocaleString('id-ID')}</td><td>${pt}</td></tr>`;
+                    });
+                    content += '</tbody></table>';
+                } else {
+                    content += '<p class="text-muted">Belum ada history daily gym</p>';
+                }
+                content += '</div>';
+                
+                // Member History
+                content += '<div class="col-md-6"><h6>History Membership</h6>';
+                if (response.member_history && response.member_history.memberships && response.member_history.memberships.length > 0) {
+                    content += `<p><strong>Nama:</strong> ${response.member_history.name}</p>`;
+                    content += '<table class="table table-sm">';
+                    content += '<thead><tr><th>Tipe</th><th>Mulai</th><th>Berakhir</th><th>Status</th></tr></thead><tbody>';
+                    response.member_history.memberships.forEach(function(membership) {
+                        const status = membership.status === 'active' ? '<span class="badge bg-success">Aktif</span>' : '<span class="badge bg-danger">Expired</span>';
+                        content += `<tr><td>${membership.type}</td><td>${membership.start_date}</td><td>${membership.end_date}</td><td>${status}</td></tr>`;
+                    });
+                    content += '</tbody></table>';
+                    
+                    if (response.member_history.name && !$('#name').val()) {
+                        $('#name').val(response.member_history.name);
+                    }
+                } else {
+                    content += '<p class="text-muted">Belum pernah jadi member</p>';
+                }
+                content += '</div></div>';
+                
+                $('#historyContent').html(content);
+                document.getElementById('historyModal').style.display = 'block';
+            },
+            error: function() {
+                alert('Gagal mengambil data history');
+            },
+            complete: function() {
+                $btn.prop('disabled', false).html('<i class="fas fa-history"></i> Cek History');
+            }
+        });
     });
 });
 </script>

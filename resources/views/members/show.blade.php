@@ -38,7 +38,7 @@
                             </div>
                             <small class="text-muted">
                                 <i class="fas fa-calendar-alt"></i>
-                                Bergabung {{ isset($member->created_at) ? $member->created_at->format('d M Y') : '-' }}
+                                Bergabung {{ formatTanggal($member->created_at) }}
                             </small>
                         </div>
                     </div>
@@ -98,7 +98,7 @@
                                     <i class="fas fa-clock"></i>
                                     Terakhir Update
                                 </label>
-                                <div class="info-value">{{ isset($member->updated_at) ? $member->updated_at->format('d/m/Y H:i') : '-' }}</div>
+                                <div class="info-value">{{ formatTanggal($member->updated_at, true) }}</div>
                             </div>
                         </div>
                     </div>
@@ -168,7 +168,7 @@
                                     </div>
                                     <div class="membership-period">
                                         <i class="fas fa-calendar"></i>
-                                        {{ $membership->start_date->format('d/m/Y') }} - {{ $membership->end_date->format('d/m/Y') }}
+                                        {{ formatTanggal($membership->start_date) }} - {{ formatTanggal($membership->end_date) }}
                                     </div>
                                     <div class="membership-price">
                                         <i class="fas fa-tag"></i>
