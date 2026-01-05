@@ -18,18 +18,25 @@ class ReportController extends Controller
 {
     public function sales(Request $request)
     {
-        $startDate = $request->get('start_date', Carbon::now()->startOfMonth());
-        $endDate = $request->get('end_date', Carbon::now()->endOfMonth());
+        $startDate = $request->get('start_date') ? Carbon::parse($request->get('start_date')) : Carbon::now()->startOfMonth();
+        $endDate = $request->get('end_date') ? Carbon::parse($request->get('end_date')) : Carbon::now()->endOfMonth();
+        $staffId = $request->get('staff_id');
         
         // POS Transactions
         $transactions = Transaction::with(['user', 'details.product'])
             ->whereBetween('created_at', [$startDate, $endDate])
             ->where('status', 'completed')
+            ->when($staffId, function($query, $staffId) {
+                return $query->where('user_id', $staffId);
+            })
             ->latest()
             ->paginate(15);
             
         $totalPosSales = Transaction::whereBetween('created_at', [$startDate, $endDate])
             ->where('status', 'completed')
+            ->when($staffId, function($query, $staffId) {
+                return $query->where('user_id', $staffId);
+            })
             ->sum('total_amount');
             
         // Membership Payments
