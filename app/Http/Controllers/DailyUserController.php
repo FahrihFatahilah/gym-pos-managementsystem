@@ -41,6 +41,7 @@ class DailyUserController extends Controller
             'personal_trainer_id' => 'nullable|exists:personal_trainers,id',
             'fitness_goals' => 'nullable|string',
             'visit_date' => 'required|date',
+            'daily_price_type' => 'required|in:regular,premium',
             'payment_method' => 'required|in:cash,qris,transfer'
         ]);
 
@@ -52,7 +53,11 @@ class DailyUserController extends Controller
             $ptPrice = $trainer ? $trainer->hourly_rate : 0;
         }
 
-        $totalAmount = $gymSettings->membership_daily_price + $ptPrice;
+        $dailyPrice = $request->daily_price_type === 'premium' 
+            ? $gymSettings->daily_price_premium 
+            : $gymSettings->daily_price_regular;
+
+        $totalAmount = $dailyPrice + $ptPrice;
 
         DailyUser::create([
             'name' => $request->name,

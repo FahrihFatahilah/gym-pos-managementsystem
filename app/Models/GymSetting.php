@@ -23,6 +23,8 @@ class GymSetting extends Model
         'membership_monthly_price',
         'membership_yearly_price',
         'membership_daily_price',
+        'daily_price_regular',
+        'daily_price_premium',
         'currency',
         'timezone'
     ];
@@ -30,7 +32,9 @@ class GymSetting extends Model
     protected $casts = [
         'membership_monthly_price' => 'decimal:2',
         'membership_yearly_price' => 'decimal:2',
-        'membership_daily_price' => 'decimal:2'
+        'membership_daily_price' => 'decimal:2',
+        'daily_price_regular' => 'decimal:2',
+        'daily_price_premium' => 'decimal:2'
     ];
 
     /**
@@ -48,7 +52,9 @@ class GymSetting extends Model
                 'gym_email' => 'info@gym.com',
                 'receipt_footer' => 'Terima kasih atas kunjungan Anda!\nSemoga sehat selalu',
                 'membership_monthly_price' => 150000,
-                'membership_yearly_price' => 1500000
+                'membership_yearly_price' => 1500000,
+                'daily_price_regular' => 25000,
+                'daily_price_premium' => 35000
             ]);
         }
         

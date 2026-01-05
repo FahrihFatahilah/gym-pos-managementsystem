@@ -34,6 +34,8 @@ class SettingController extends Controller
             'membership_monthly_price' => 'required|numeric|min:0',
             'membership_yearly_price' => 'required|numeric|min:0',
             'membership_daily_price' => 'required|numeric|min:0',
+            'daily_price_regular' => 'required|numeric|min:0',
+            'daily_price_premium' => 'required|numeric|min:0',
             'currency' => 'required|string|in:IDR,USD,EUR',
             'timezone' => 'required|string',
             'gym_logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',

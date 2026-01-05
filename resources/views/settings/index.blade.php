@@ -179,6 +179,34 @@
                             </div>
 
                             <div class="mb-3">
+                                <label for="daily_price_regular" class="form-label">Harga Harian Reguler <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text">Rp</span>
+                                    <input type="number" class="form-control @error('daily_price_regular') is-invalid @enderror" 
+                                           id="daily_price_regular" name="daily_price_regular" 
+                                           value="{{ old('daily_price_regular', $settings->daily_price_regular) }}" 
+                                           min="0" step="1000" required>
+                                </div>
+                                @error('daily_price_regular')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="daily_price_premium" class="form-label">Harga Harian Premium <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text">Rp</span>
+                                    <input type="number" class="form-control @error('daily_price_premium') is-invalid @enderror" 
+                                           id="daily_price_premium" name="daily_price_premium" 
+                                           value="{{ old('daily_price_premium', $settings->daily_price_premium) }}" 
+                                           min="0" step="1000" required>
+                                </div>
+                                @error('daily_price_premium')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="mb-3">
                                 <label for="membership_monthly_price" class="form-label">Harga Bulanan <span class="text-danger">*</span></label>
                                 <div class="input-group">
                                     <span class="input-group-text">Rp</span>

@@ -1,0 +1,29 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('gym_settings', function (Blueprint $table) {
+            $table->decimal('daily_price_regular', 10, 2)->default(25000)->after('membership_daily_price');
+            $table->decimal('daily_price_premium', 10, 2)->default(35000)->after('daily_price_regular');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('gym_settings', function (Blueprint $table) {
+            $table->dropColumn(['daily_price_regular', 'daily_price_premium']);
+        });
+    }
+};

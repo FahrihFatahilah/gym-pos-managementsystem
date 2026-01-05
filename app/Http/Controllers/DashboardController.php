@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Member;
 use App\Models\Product;
 use App\Models\Transaction;
+use App\Models\DailyUser;
 use Carbon\Carbon;
 
 class DashboardController extends Controller
@@ -18,10 +19,17 @@ class DashboardController extends Controller
         // Total member aktif
         $totalActiveMembers = Member::where('status', 'active')->count();
         
+        // Total daily users hari ini
+        $todayDailyUsers = DailyUser::whereDate('visit_date', Carbon::today())->count();
+        
         // Total penjualan hari ini
         $todaySales = Transaction::whereDate('created_at', Carbon::today())
             ->where('status', 'completed')
             ->sum('total_amount');
+        
+        // Total pendapatan daily users hari ini
+        $todayDailyRevenue = DailyUser::whereDate('visit_date', Carbon::today())
+            ->sum('amount_paid');
         
         // Produk dengan stok minimum (< 10)
         $lowStockProducts = Product::where('stock', '<', 10)
@@ -66,7 +74,9 @@ class DashboardController extends Controller
         
         return view('dashboard', compact(
             'totalActiveMembers',
+            'todayDailyUsers',
             'todaySales',
+            'todayDailyRevenue',
             'lowStockProducts',
             'expiringMembers',
             'expiringMembersList',

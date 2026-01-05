@@ -82,6 +82,27 @@
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
+                                <label for="daily_price_type" class="form-label">Tipe Harga Harian <span class="text-danger">*</span></label>
+                                <select class="form-select @error('daily_price_type') is-invalid @enderror" 
+                                        id="daily_price_type" name="daily_price_type" required>
+                                    <option value="">Pilih Tipe Harga</option>
+                                    <option value="regular" {{ old('daily_price_type') == 'regular' ? 'selected' : '' }}>
+                                        Reguler - Rp {{ number_format(App\Models\GymSetting::getSettings()->daily_price_regular, 0, ',', '.') }}
+                                    </option>
+                                    <option value="premium" {{ old('daily_price_type') == 'premium' ? 'selected' : '' }}>
+                                        Premium - Rp {{ number_format(App\Models\GymSetting::getSettings()->daily_price_premium, 0, ',', '.') }}
+                                    </option>
+                                </select>
+                                @error('daily_price_type')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
                                 <label for="payment_method" class="form-label">Metode Pembayaran <span class="text-danger">*</span></label>
                                 <select class="form-select @error('payment_method') is-invalid @enderror" 
                                         id="payment_method" name="payment_method" required>
@@ -99,7 +120,7 @@
 
                     <div class="alert alert-info">
                         <strong>Total Biaya:</strong> 
-                        Rp {{ number_format(App\Models\GymSetting::getSettings()->membership_daily_price, 0, ',', '.') }}
+                        <span id="daily-price">Pilih tipe harga terlebih dahulu</span>
                         <span id="pt-cost" style="display: none;"> + Rp <span id="pt-amount">0</span> (PT)</span>
                     </div>
 
@@ -120,10 +141,23 @@
 @push('scripts')
 <script>
 $(document).ready(function() {
+    const regularPrice = {{ App\Models\GymSetting::getSettings()->daily_price_regular }};
+    const premiumPrice = {{ App\Models\GymSetting::getSettings()->daily_price_premium }};
+    
+    $('#daily_price_type').on('change', function() {
+        const priceType = $(this).val();
+        if (priceType === 'regular') {
+            $('#daily-price').text('Rp ' + regularPrice.toLocaleString('id-ID'));
+        } else if (priceType === 'premium') {
+            $('#daily-price').text('Rp ' + premiumPrice.toLocaleString('id-ID'));
+        } else {
+            $('#daily-price').text('Pilih tipe harga terlebih dahulu');
+        }
+    });
+    
     $('#personal_trainer_id').on('change', function() {
         const trainerId = $(this).val();
         if (trainerId) {
-            // Get trainer hourly rate (you might want to add this via AJAX)
             $('#pt-cost').show();
         } else {
             $('#pt-cost').hide();
