@@ -10,7 +10,7 @@ if (!function_exists('formatTanggal')) {
             9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
         ];
         
-        $carbon = \Carbon\Carbon::parse($date);
+        $carbon = \Carbon\Carbon::parse($date)->setTimezone('Asia/Makassar');
         $format = $carbon->day . ' ' . $bulan[$carbon->month] . ' ' . $carbon->year;
         
         if ($withTime) {

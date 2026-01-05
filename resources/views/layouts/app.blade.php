@@ -772,7 +772,7 @@
                                     <a class="nav-link {{ request()->routeIs('daily-users.*') ? 'active' : '' }}" 
                                     href="{{ route('daily-users.index') }}">
                                         <i class="fas fa-calendar-day me-2"></i>
-                                        Penungjung Harian
+                                        Pengunjung Harian
                                     </a>
                                 </li>
                             </ul>
@@ -815,6 +815,9 @@
                                href="{{ route('stocks.index') }}">
                                 <i class="fas fa-warehouse me-2"></i>
                                 Stok
+                                @if(auth()->user()->role === 'staff')
+                                    <small class="text-muted">(View Only)</small>
+                                @endif
                             </a>
                         </li>
                         @endif

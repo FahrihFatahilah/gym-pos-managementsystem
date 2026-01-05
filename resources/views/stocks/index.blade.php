@@ -46,12 +46,16 @@
                                         @endif
                                     </td>
                                     <td>
+                                        @if(auth()->user()->role === 'admin')
                                         <button class="btn btn-sm btn-primary" data-bs-toggle="modal" 
                                                 data-bs-target="#updateStockModal" 
                                                 data-product-id="{{ $product->id }}"
                                                 data-product-name="{{ $product->name }}">
                                             <i class="fas fa-edit"></i> Update Stok
                                         </button>
+                                        @else
+                                        <span class="text-muted small">View Only</span>
+                                        @endif
                                     </td>
                                 </tr>
                             @empty

@@ -50,6 +50,7 @@
                                             <a href="{{ route('products.show', $product) }}" class="btn btn-sm btn-info">
                                                 <i class="fas fa-eye"></i>
                                             </a>
+                                            @if(auth()->user()->role === 'admin')
                                             <a href="{{ route('products.edit', $product) }}" class="btn btn-sm btn-warning">
                                                 <i class="fas fa-edit"></i>
                                             </a>
@@ -60,6 +61,7 @@
                                                     <i class="fas fa-trash"></i>
                                                 </button>
                                             </form>
+                                            @endif
                                         </div>
                                     </td>
                                 </tr>

@@ -66,7 +66,8 @@ class DailyUserController extends Controller
             'personal_trainer_id' => 'nullable|exists:personal_trainers,id',
             'fitness_goals' => 'nullable|string',
             'visit_date' => 'required|date',
-            'daily_price_type' => 'required|in:regular,premium',
+            'daily_price_type' => 'required|in:regular,premium,custom',
+            'custom_price' => 'required_if:daily_price_type,custom|nullable|numeric|min:0',
             'payment_method' => 'required|in:cash,qris,transfer'
         ]);
 
@@ -78,11 +79,12 @@ class DailyUserController extends Controller
             $ptPrice = $trainer ? $trainer->hourly_rate : 0;
         }
 
-        $dailyPrice = $request->daily_price_type === 'premium' 
-            ? $gymSettings->daily_price_premium 
-            : $gymSettings->daily_price_regular;
+        $isCustom = $request->daily_price_type === 'custom';
+        $dailyPrice = $isCustom ? $request->custom_price : 
+            ($request->daily_price_type === 'premium' ? $gymSettings->daily_price_premium : $gymSettings->daily_price_regular);
 
         $totalAmount = $dailyPrice + $ptPrice;
+        $validUntil = \Carbon\Carbon::parse($request->visit_date)->addDays(2);
 
         DailyUser::create([
             'name' => $request->name,
@@ -91,7 +93,10 @@ class DailyUserController extends Controller
             'personal_trainer_id' => $request->personal_trainer_id,
             'fitness_goals' => $request->fitness_goals,
             'visit_date' => $request->visit_date,
+            'valid_until' => $validUntil,
             'amount_paid' => $totalAmount,
+            'is_custom_price' => $isCustom,
+            'custom_price' => $isCustom ? $request->custom_price : null,
             'payment_method' => $request->payment_method
         ]);
 

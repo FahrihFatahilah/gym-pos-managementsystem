@@ -43,12 +43,21 @@ Route::middleware(['auth', 'redirect.pt'])->group(function () {
     Route::post('memberships/{membership}/extend', [MembershipController::class, 'extend'])->name('memberships.extend');
     
     // Products Management
-    Route::resource('products', ProductController::class);
+    Route::get('products', [ProductController::class, 'index'])->name('products.index');
+    Route::get('products/create', [ProductController::class, 'create'])->name('products.create');
+    Route::post('products', [ProductController::class, 'store'])->name('products.store');
+    Route::get('products/{product}', [ProductController::class, 'show'])->name('products.show');
+    
+    // Admin only product actions
+    Route::middleware(['role:admin'])->group(function () {
+        Route::get('products/{product}/edit', [ProductController::class, 'edit'])->name('products.edit');
+        Route::put('products/{product}', [ProductController::class, 'update'])->name('products.update');
+        Route::delete('products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
+    });
     
     // Stock Management
     Route::get('stocks', [StockController::class, 'index'])->name('stocks.index');
     Route::get('stocks/history', [StockController::class, 'history'])->name('stocks.history');
-    Route::post('stocks/update', [StockController::class, 'updateStock'])->name('stocks.update');
     
     // POS System
     Route::prefix('pos')->name('pos.')->group(function () {
@@ -91,6 +100,13 @@ Route::middleware(['auth', 'redirect.pt'])->group(function () {
         Route::get('/{member}', [App\Http\Controllers\PTMemberController::class, 'show'])->name('show');
     });
     
+    // Daily Users - accessible by both admin and staff
+    Route::get('daily-users', [App\Http\Controllers\DailyUserController::class, 'index'])->name('daily-users.index');
+    Route::get('daily-users/create', [App\Http\Controllers\DailyUserController::class, 'create'])->name('daily-users.create');
+    Route::post('daily-users', [App\Http\Controllers\DailyUserController::class, 'store'])->name('daily-users.store');
+    Route::get('daily-users/{dailyUser}', [App\Http\Controllers\DailyUserController::class, 'show'])->name('daily-users.show');
+    Route::post('daily-users/check-history', [App\Http\Controllers\DailyUserController::class, 'checkHistory'])->name('daily-users.check-history');
+    
     // Settings (Admin only)
     Route::middleware(['role:admin'])->group(function () {
         Route::get('/settings', [App\Http\Controllers\SettingController::class, 'index'])->name('settings.index');
@@ -98,8 +114,16 @@ Route::middleware(['auth', 'redirect.pt'])->group(function () {
         Route::delete('/settings/remove-logo', [App\Http\Controllers\SettingController::class, 'removeLogo'])->name('settings.remove-logo');
         Route::delete('/settings/remove-favicon', [App\Http\Controllers\SettingController::class, 'removeFavicon'])->name('settings.remove-favicon');
         
-        Route::resource('daily-users', App\Http\Controllers\DailyUserController::class);
-        Route::post('daily-users/check-history', [App\Http\Controllers\DailyUserController::class, 'checkHistory'])->name('daily-users.check-history');
+        Route::post('stocks/update', [StockController::class, 'updateStock'])->name('stocks.update');
+        
+        Route::put('daily-users/{dailyUser}', [App\Http\Controllers\DailyUserController::class, 'update'])->name('daily-users.update');
+        Route::get('daily-users/{dailyUser}/edit', [App\Http\Controllers\DailyUserController::class, 'edit'])->name('daily-users.edit');
+        Route::delete('daily-users/{dailyUser}', [App\Http\Controllers\DailyUserController::class, 'destroy'])->name('daily-users.destroy');
+        
+        Route::get('products/{product}/edit', [ProductController::class, 'edit'])->name('products.edit');
+        Route::put('products/{product}', [ProductController::class, 'update'])->name('products.update');
+        Route::delete('products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
+        
         Route::resource('personal-trainers', App\Http\Controllers\PersonalTrainerController::class);
         
         // Branch Management

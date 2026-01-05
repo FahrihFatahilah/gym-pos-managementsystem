@@ -110,8 +110,29 @@
                                     <option value="premium" {{ old('daily_price_type') == 'premium' ? 'selected' : '' }}>
                                         Premium - Rp {{ number_format(App\Models\GymSetting::getSettings()->daily_price_premium, 0, ',', '.') }}
                                     </option>
+                                    <option value="custom" {{ old('daily_price_type') == 'custom' ? 'selected' : '' }}>
+                                        Custom - Masukkan harga sendiri
+                                    </option>
                                 </select>
                                 @error('daily_price_type')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row" id="customPriceRow" style="display: none;">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="custom_price" class="form-label">Harga Custom <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text">Rp</span>
+                                    <input type="number" class="form-control @error('custom_price') is-invalid @enderror" 
+                                           id="custom_price" name="custom_price" 
+                                           value="{{ old('custom_price') }}" 
+                                           min="0" step="1000">
+                                </div>
+                                @error('custom_price')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
@@ -166,10 +187,23 @@ $(document).ready(function() {
         const priceType = $(this).val();
         if (priceType === 'regular') {
             $('#daily-price').text('Rp ' + regularPrice.toLocaleString('id-ID'));
+            $('#customPriceRow').hide();
         } else if (priceType === 'premium') {
             $('#daily-price').text('Rp ' + premiumPrice.toLocaleString('id-ID'));
+            $('#customPriceRow').hide();
+        } else if (priceType === 'custom') {
+            $('#daily-price').text('Masukkan harga custom');
+            $('#customPriceRow').show();
         } else {
             $('#daily-price').text('Pilih tipe harga terlebih dahulu');
+            $('#customPriceRow').hide();
+        }
+    });
+    
+    $('#custom_price').on('input', function() {
+        const customPrice = parseInt($(this).val()) || 0;
+        if (customPrice > 0) {
+            $('#daily-price').text('Rp ' + customPrice.toLocaleString('id-ID'));
         }
     });
     

@@ -47,6 +47,15 @@
                                             <a href="{{ route('members.edit', $member) }}" class="btn btn-sm btn-warning">
                                                 <i class="fas fa-edit"></i>
                                             </a>
+                                            @if(auth()->user()->role === 'admin')
+                                            <form action="{{ route('members.destroy', $member) }}" method="POST" class="d-inline">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Yakin hapus member ini? Data tidak dapat dikembalikan!')">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                            @endif
                                         </div>
                                     </td>
                                 </tr>
