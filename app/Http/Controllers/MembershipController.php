@@ -25,6 +25,7 @@ class MembershipController extends Controller
         $request->validate([
             'member_id' => 'required|exists:members,id',
             'type' => 'required|in:monthly,yearly,custom',
+            'category' => 'required|in:regular,pt',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after:start_date',
             'price' => 'required|numeric|min:0'
@@ -51,6 +52,7 @@ class MembershipController extends Controller
         $request->validate([
             'member_id' => 'required|exists:members,id',
             'type' => 'required|in:monthly,yearly,custom',
+            'category' => 'required|in:regular,pt',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after:start_date',
             'price' => 'required|numeric|min:0'

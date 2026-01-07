@@ -45,15 +45,24 @@
                 <!-- Filter -->
                 <form method="GET" class="mb-4">
                     <div class="row">
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <label class="form-label">Tanggal Mulai</label>
                             <input type="date" name="start_date" class="form-control" 
                                    value="{{ request('start_date', $startDate->format('Y-m-d')) }}">
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <label class="form-label">Tanggal Akhir</label>
                             <input type="date" name="end_date" class="form-control" 
                                    value="{{ request('end_date', $endDate->format('Y-m-d')) }}">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Metode Bayar</label>
+                            <select name="payment_method" class="form-control">
+                                <option value="">Semua</option>
+                                <option value="cash" {{ request('payment_method') == 'cash' ? 'selected' : '' }}>Cash</option>
+                                <option value="qris" {{ request('payment_method') == 'qris' ? 'selected' : '' }}>QRIS</option>
+                                <option value="transfer" {{ request('payment_method') == 'transfer' ? 'selected' : '' }}>Transfer</option>
+                            </select>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">&nbsp;</label>

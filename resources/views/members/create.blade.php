@@ -83,16 +83,24 @@
                     </h6>
 
                     <div class="mb-3">
-                        <label for="membership_type" class="form-label">Tipe Membership <span class="text-danger">*</span></label>
-                        <select class="form-select @error('membership_type') is-invalid @enderror" 
-                                id="membership_type" name="membership_type" required>
-                            <option value="">Pilih Tipe Membership</option>
-                            <option value="daily" {{ old('membership_type') == 'daily' ? 'selected' : '' }}>Harian - Rp <span id="daily-price">{{ number_format(App\Models\GymSetting::getSettings()->membership_daily_price, 0, ',', '.') }}</span></option>
-                            <option value="monthly" {{ old('membership_type') == 'monthly' ? 'selected' : '' }}>Bulanan - Rp 150.000</option>
-                            <option value="yearly" {{ old('membership_type') == 'yearly' ? 'selected' : '' }}>Tahunan - Rp 1.500.000</option>
-                            <option value="custom" {{ old('membership_type') == 'custom' ? 'selected' : '' }}>Custom</option>
+                        <label for="packet_id" class="form-label">Paket Membership <span class="text-danger">*</span></label>
+                        <select class="form-select @error('packet_id') is-invalid @enderror" 
+                                id="packet_id" name="packet_id" required>
+                            <option value="">Pilih Paket</option>
+                            @foreach($packets->groupBy('type') as $type => $typePackets)
+                                <optgroup label="{{ $type === 'daily' ? 'Harian / Day Pass' : 'Membership' }}">
+                                    @foreach($typePackets as $packet)
+                                        <option value="{{ $packet->id }}" 
+                                                data-price="{{ $packet->price }}"
+                                                data-duration="{{ $packet->duration_days }}"
+                                                {{ old('packet_id') == $packet->id ? 'selected' : '' }}>
+                                            {{ $packet->name }} - {{ $packet->formatted_price }}
+                                        </option>
+                                    @endforeach
+                                </optgroup>
+                            @endforeach
                         </select>
-                        @error('membership_type')
+                        @error('packet_id')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
@@ -110,27 +118,16 @@
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="end_date" class="form-label">Tanggal Berakhir <span class="text-danger">*</span></label>
-                                <input type="date" class="form-control @error('end_date') is-invalid @enderror" 
-                                       id="end_date" name="end_date" value="{{ old('end_date') }}" required readonly>
-                                @error('end_date')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                                <label class="form-label">Tanggal Berakhir</label>
+                                <input type="text" class="form-control" id="end_date_display" readonly>
+                                <small class="text-muted">Otomatis dihitung berdasarkan paket</small>
                             </div>
                         </div>
                     </div>
 
-                    <div class="mb-3" id="custom_price_field" style="display: none;">
-                        <label for="membership_price" class="form-label">Harga Custom <span class="text-danger">*</span></label>
-                        <div class="input-group">
-                            <span class="input-group-text">Rp</span>
-                            <input type="number" class="form-control @error('membership_price') is-invalid @enderror" 
-                                   id="membership_price" name="membership_price" value="{{ old('membership_price') }}" 
-                                   min="0" step="1000">
-                        </div>
-                        @error('membership_price')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
+                    <div id="packet-info" class="alert alert-info" style="display: none;">
+                        <h6>Detail Paket:</h6>
+                        <div id="packet-details"></div>
                     </div>
 
                     <div class="mb-3">
@@ -165,84 +162,46 @@
 @push('scripts')
 <script>
 $(document).ready(function() {
-    // Auto calculate end date based on membership type
-    $('#membership_type, #start_date').on('change', function() {
-        const type = $('#membership_type').val();
+    // Auto calculate end date based on packet selection
+    $('#packet_id, #start_date').on('change', function() {
+        const packetId = $('#packet_id').val();
         const startDate = $('#start_date').val();
         
-        if (type && startDate) {
-            const start = new Date(startDate);
-            let endDate;
+        if (packetId && startDate) {
+            const selectedOption = $('#packet_id option:selected');
+            const duration = selectedOption.data('duration');
+            const price = selectedOption.data('price');
             
-            if (type === 'daily') {
-                // Daily membership is only for the selected day
-                endDate = new Date(start);
-                $('#custom_price_field').hide();
-                $('#membership_price').removeAttr('required');
-            } else if (type === 'monthly') {
-                // Add 1 month, handle month overflow properly
-                endDate = new Date(start);
-                endDate.setMonth(start.getMonth() + 1);
+            if (duration && startDate) {
+                const start = new Date(startDate);
+                const endDate = new Date(start);
+                endDate.setDate(start.getDate() + duration);
                 
-                // Handle cases where the day doesn't exist in the target month
-                // e.g., Jan 31 + 1 month should be Feb 28/29, not Mar 3
-                if (endDate.getDate() !== start.getDate()) {
-                    endDate.setDate(0); // Set to last day of previous month
-                }
+                const formattedEndDate = endDate.toLocaleDateString('id-ID', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                });
                 
-                $('#custom_price_field').hide();
-                $('#membership_price').removeAttr('required');
-            } else if (type === 'yearly') {
-                // Add 1 year, handle leap year properly
-                endDate = new Date(start);
-                endDate.setFullYear(start.getFullYear() + 1);
+                $('#end_date_display').val(formattedEndDate);
                 
-                // Handle leap year case (Feb 29 -> Feb 28)
-                if (start.getMonth() === 1 && start.getDate() === 29 && !isLeapYear(endDate.getFullYear())) {
-                    endDate.setDate(28);
-                }
-                
-                $('#custom_price_field').hide();
-                $('#membership_price').removeAttr('required');
-            } else if (type === 'custom') {
-                // Default to 1 month for custom
-                endDate = new Date(start);
-                endDate.setMonth(start.getMonth() + 1);
-                
-                if (endDate.getDate() !== start.getDate()) {
-                    endDate.setDate(0);
-                }
-                
-                $('#custom_price_field').show();
-                $('#membership_price').attr('required', true);
+                // Show packet info
+                $('#packet-details').html(`
+                    <p><strong>Harga:</strong> Rp ${parseInt(price).toLocaleString('id-ID')}</p>
+                    <p><strong>Durasi:</strong> ${duration} hari</p>
+                    <p><strong>Berakhir:</strong> ${formattedEndDate}</p>
+                `);
+                $('#packet-info').show();
             }
-            
-            if (endDate) {
-                const formattedDate = endDate.toISOString().split('T')[0];
-                $('#end_date').val(formattedDate);
-            }
-        }
-    });
-    
-    // Helper function to check leap year
-    function isLeapYear(year) {
-        return (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
-    }
-    
-    // Show/hide custom price field
-    $('#membership_type').on('change', function() {
-        if ($(this).val() === 'custom') {
-            $('#custom_price_field').show();
-            $('#membership_price').attr('required', true);
         } else {
-            $('#custom_price_field').hide();
-            $('#membership_price').removeAttr('required');
+            $('#end_date_display').val('');
+            $('#packet-info').hide();
         }
     });
     
-    // Set default start date to today and calculate end date
-    if ($('#start_date').val() && $('#membership_type').val()) {
-        $('#membership_type').trigger('change');
+    // Trigger calculation if values already selected
+    if ($('#packet_id').val() && $('#start_date').val()) {
+        $('#packet_id').trigger('change');
     }
 });
 </script>

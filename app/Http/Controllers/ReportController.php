@@ -21,6 +21,7 @@ class ReportController extends Controller
         $startDate = $request->get('start_date') ? Carbon::parse($request->get('start_date')) : Carbon::now()->startOfMonth();
         $endDate = $request->get('end_date') ? Carbon::parse($request->get('end_date')) : Carbon::now()->endOfMonth();
         $staffId = $request->get('staff_id');
+        $paymentMethod = $request->get('payment_method');
         
         // POS Transactions
         $transactions = Transaction::with(['user', 'details.product'])
@@ -28,6 +29,9 @@ class ReportController extends Controller
             ->where('status', 'completed')
             ->when($staffId, function($query, $staffId) {
                 return $query->where('user_id', $staffId);
+            })
+            ->when($paymentMethod, function($query, $paymentMethod) {
+                return $query->where('payment_method', $paymentMethod);
             })
             ->latest()
             ->paginate(15);
@@ -37,26 +41,41 @@ class ReportController extends Controller
             ->when($staffId, function($query, $staffId) {
                 return $query->where('user_id', $staffId);
             })
+            ->when($paymentMethod, function($query, $paymentMethod) {
+                return $query->where('payment_method', $paymentMethod);
+            })
             ->sum('total_amount');
             
         // Membership Payments
         $membershipPayments = \App\Models\Payment::with(['member', 'membership'])
             ->whereBetween('payment_date', [$startDate, $endDate])
             ->where('status', 'completed')
+            ->when($paymentMethod, function($query, $paymentMethod) {
+                return $query->where('payment_method', $paymentMethod);
+            })
             ->latest('payment_date')
             ->paginate(15, ['*'], 'membership_page');
             
         $totalMembershipSales = \App\Models\Payment::whereBetween('payment_date', [$startDate, $endDate])
             ->where('status', 'completed')
+            ->when($paymentMethod, function($query, $paymentMethod) {
+                return $query->where('payment_method', $paymentMethod);
+            })
             ->sum('amount');
             
         // Pengunjung Harians
         $dailyUsers = \App\Models\DailyUser::with('personalTrainer')
             ->whereBetween('visit_date', [$startDate, $endDate])
+            ->when($paymentMethod, function($query, $paymentMethod) {
+                return $query->where('payment_method', $paymentMethod);
+            })
             ->latest('visit_date')
             ->paginate(15, ['*'], 'daily_page');
             
         $totalDailyUserSales = \App\Models\DailyUser::whereBetween('visit_date', [$startDate, $endDate])
+            ->when($paymentMethod, function($query, $paymentMethod) {
+                return $query->where('payment_method', $paymentMethod);
+            })
             ->sum('amount_paid');
             
         $totalSales = $totalPosSales + $totalMembershipSales + $totalDailyUserSales;
@@ -76,12 +95,52 @@ class ReportController extends Controller
 
     public function members(Request $request)
     {
-        $members = Member::with(['activeMembership', 'payments'])
+        // Get regular members
+        $regularMembers = Member::with(['activeMembership', 'payments'])
             ->when($request->status, function($query, $status) {
                 return $query->where('status', $status);
             })
-            ->latest()
-            ->paginate(15);
+            ->get();
+            
+        // Get PT members
+        $ptMembers = \App\Models\PTMember::with(['packet', 'personalTrainer'])
+            ->when($request->status, function($query, $status) {
+                return $query->where('status', $status);
+            })
+            ->when($request->payment_method, function($query, $paymentMethod) {
+                return $query->where('payment_method', $paymentMethod);
+            })
+            ->get();
+            
+        // Get memberships with PT category
+        $membershipsPT = \App\Models\Membership::with(['member', 'payments'])
+            ->where('category', 'pt')
+            ->when($request->status, function($query, $status) {
+                return $query->where('status', $status);
+            })
+            ->when($request->payment_method, function($query, $paymentMethod) {
+                return $query->whereHas('payments', function($q) use ($paymentMethod) {
+                    $q->where('payment_method', $paymentMethod);
+                });
+            })
+            ->get();
+            
+        // Combine all collections
+        $members = $regularMembers->concat($ptMembers)->concat($membershipsPT)->sortByDesc('created_at');
+        
+        // Manual pagination
+        $perPage = 15;
+        $currentPage = request()->get('page', 1);
+        $offset = ($currentPage - 1) * $perPage;
+        $itemsForCurrentPage = $members->slice($offset, $perPage);
+        
+        $members = new \Illuminate\Pagination\LengthAwarePaginator(
+            $itemsForCurrentPage,
+            $members->count(),
+            $perPage,
+            $currentPage,
+            ['path' => request()->url(), 'query' => request()->query()]
+        );
             
         return view('reports.members', compact('members'));
     }
@@ -100,19 +159,57 @@ class ReportController extends Controller
 
     public function exportSales(Request $request)
     {
-        $startDate = $request->get('start_date', Carbon::now()->startOfMonth());
-        $endDate = $request->get('end_date', Carbon::now()->endOfMonth());
+        $startDate = $request->get('start_date') ? Carbon::parse($request->get('start_date')) : Carbon::now()->startOfMonth();
+        $endDate = $request->get('end_date') ? Carbon::parse($request->get('end_date')) : Carbon::now()->endOfMonth();
+        $paymentMethod = $request->get('payment_method');
         
+        // POS Transactions
         $transactions = Transaction::with(['user', 'details.product'])
             ->whereBetween('created_at', [$startDate, $endDate])
             ->where('status', 'completed')
+            ->when($paymentMethod, function($query, $paymentMethod) {
+                return $query->where('payment_method', $paymentMethod);
+            })
             ->get();
+            
+        // Membership Payments
+        $membershipPayments = \App\Models\Payment::with(['member', 'membership'])
+            ->whereBetween('payment_date', [$startDate, $endDate])
+            ->where('status', 'completed')
+            ->when($paymentMethod, function($query, $paymentMethod) {
+                return $query->where('payment_method', $paymentMethod);
+            })
+            ->get();
+            
+        // Daily Users
+        $dailyUsers = \App\Models\DailyUser::with('personalTrainer')
+            ->whereBetween('visit_date', [$startDate, $endDate])
+            ->when($paymentMethod, function($query, $paymentMethod) {
+                return $query->where('payment_method', $paymentMethod);
+            })
+            ->get();
+            
+        // Calculate totals
+        $totalPosSales = $transactions->sum('total_amount');
+        $totalMembershipSales = $membershipPayments->sum('amount');
+        $totalDailyUserSales = $dailyUsers->sum('amount_paid');
+        $totalSales = $totalPosSales + $totalMembershipSales + $totalDailyUserSales;
             
         if ($request->format === 'excel') {
             return Excel::download(new SalesExport($transactions), 'laporan-penjualan-' . date('Y-m-d') . '.xlsx');
         }
             
-        $pdf = Pdf::loadView('reports.sales-pdf', compact('transactions', 'startDate', 'endDate'));
+        $pdf = Pdf::loadView('reports.sales-pdf', compact(
+            'transactions', 
+            'membershipPayments',
+            'dailyUsers',
+            'totalSales',
+            'totalPosSales',
+            'totalMembershipSales', 
+            'totalDailyUserSales',
+            'startDate', 
+            'endDate'
+        ));
         return $pdf->download('laporan-penjualan-' . date('Y-m-d') . '.pdf');
     }
 

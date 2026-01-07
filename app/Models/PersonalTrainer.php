@@ -25,6 +25,11 @@ class PersonalTrainer extends Model
         return $this->hasMany(Member::class);
     }
 
+    public function ptMembers()
+    {
+        return $this->hasMany(PTMember::class);
+    }
+
     public function user()
     {
         return $this->hasOne(User::class);

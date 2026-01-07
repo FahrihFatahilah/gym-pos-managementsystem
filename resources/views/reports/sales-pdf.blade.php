@@ -127,10 +127,26 @@
     <div class="info">
         <table>
             <tr>
-                <td><strong>Total Transaksi:</strong></td>
+                <td><strong>Total Transaksi POS:</strong></td>
                 <td class="value">{{ $transactions->count() }} transaksi</td>
-                <td><strong>Total Penjualan:</strong></td>
-                <td class="text-right value">Rp {{ number_format($transactions->sum('total_amount'), 0, ',', '.') }}</td>
+                <td><strong>Total POS:</strong></td>
+                <td class="text-right value">Rp {{ number_format($totalPosSales, 0, ',', '.') }}</td>
+            </tr>
+            <tr>
+                <td><strong>Total Membership:</strong></td>
+                <td class="value">{{ $membershipPayments->count() }} pembayaran</td>
+                <td><strong>Total Membership:</strong></td>
+                <td class="text-right value">Rp {{ number_format($totalMembershipSales, 0, ',', '.') }}</td>
+            </tr>
+            <tr>
+                <td><strong>Total Daily Users:</strong></td>
+                <td class="value">{{ $dailyUsers->count() }} pengunjung</td>
+                <td><strong>Total Daily:</strong></td>
+                <td class="text-right value">Rp {{ number_format($totalDailyUserSales, 0, ',', '.') }}</td>
+            </tr>
+            <tr style="background: #10b981; color: white;">
+                <td colspan="2"><strong>GRAND TOTAL:</strong></td>
+                <td colspan="2" class="text-right"><strong>Rp {{ number_format($totalSales, 0, ',', '.') }}</strong></td>
             </tr>
         </table>
     </div>
@@ -164,10 +180,84 @@
         </tbody>
         <tfoot>
             <tr class="total">
-                <td colspan="5" class="text-right"><strong>TOTAL:</strong></td>
-                <td class="text-right"><strong>Rp {{ number_format($transactions->sum('total_amount'), 0, ',', '.') }}</strong></td>
+                <td colspan="5" class="text-right"><strong>TOTAL POS:</strong></td>
+                <td class="text-right"><strong>Rp {{ number_format($totalPosSales, 0, ',', '.') }}</strong></td>
             </tr>
         </tfoot>
+    </table>
+
+    <!-- Membership Payments Table -->
+    @if($membershipPayments->count() > 0)
+    <h3 style="margin-top: 30px; color: #1e40af;">Pembayaran Membership</h3>
+    <table>
+        <thead>
+            <tr>
+                <th width="15%">Tanggal</th>
+                <th width="25%">Member</th>
+                <th width="20%">Tipe</th>
+                <th width="15%">Metode</th>
+                <th width="25%">Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($membershipPayments as $payment)
+                <tr>
+                    <td>{{ Carbon\Carbon::parse($payment->payment_date)->format('d/m/Y H:i') }}</td>
+                    <td>{{ $payment->member->name }}</td>
+                    <td>{{ ucfirst($payment->membership->type ?? 'N/A') }}</td>
+                    <td>{{ ucfirst($payment->payment_method) }}</td>
+                    <td class="text-right">Rp {{ number_format($payment->amount, 0, ',', '.') }}</td>
+                </tr>
+            @endforeach
+        </tbody>
+        <tfoot>
+            <tr class="total">
+                <td colspan="4" class="text-right"><strong>TOTAL MEMBERSHIP:</strong></td>
+                <td class="text-right"><strong>Rp {{ number_format($totalMembershipSales, 0, ',', '.') }}</strong></td>
+            </tr>
+        </tfoot>
+    </table>
+    @endif
+
+    <!-- Daily Users Table -->
+    @if($dailyUsers->count() > 0)
+    <h3 style="margin-top: 30px; color: #1e40af;">Pengunjung Harians</h3>
+    <table>
+        <thead>
+            <tr>
+                <th width="15%">Tanggal</th>
+                <th width="25%">Nama</th>
+                <th width="20%">Kontak</th>
+                <th width="15%">Metode</th>
+                <th width="25%">Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($dailyUsers as $user)
+                <tr>
+                    <td>{{ $user->visit_date->format('d/m/Y') }}</td>
+                    <td>{{ $user->name }}</td>
+                    <td>{{ $user->phone }}</td>
+                    <td>{{ ucfirst($user->payment_method) }}</td>
+                    <td class="text-right">Rp {{ number_format($user->amount_paid, 0, ',', '.') }}</td>
+                </tr>
+            @endforeach
+        </tbody>
+        <tfoot>
+            <tr class="total">
+                <td colspan="4" class="text-right"><strong>TOTAL DAILY:</strong></td>
+                <td class="text-right"><strong>Rp {{ number_format($totalDailyUserSales, 0, ',', '.') }}</strong></td>
+            </tr>
+        </tfoot>
+    </table>
+    @endif
+
+    <!-- Grand Total -->
+    <table style="margin-top: 30px; border: 2px solid #10b981;">
+        <tr style="background: #10b981; color: white;">
+            <td colspan="4" class="text-right" style="padding: 15px; font-size: 14px;"><strong>GRAND TOTAL SEMUA PENJUALAN:</strong></td>
+            <td class="text-right" style="padding: 15px; font-size: 14px;"><strong>Rp {{ number_format($totalSales, 0, ',', '.') }}</strong></td>
+        </tr>
     </table>
 
     <div class="footer">

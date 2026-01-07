@@ -97,7 +97,21 @@ Route::middleware(['auth', 'redirect.pt'])->group(function () {
     // PT Member Management
     Route::middleware(['auth'])->prefix('pt-members')->name('pt-members.')->group(function () {
         Route::get('/', [App\Http\Controllers\PTMemberController::class, 'index'])->name('index');
-        Route::get('/{member}', [App\Http\Controllers\PTMemberController::class, 'show'])->name('show');
+        Route::get('/create', [App\Http\Controllers\PTMemberController::class, 'create'])->name('create');
+        Route::post('/', [App\Http\Controllers\PTMemberController::class, 'store'])->name('store');
+        Route::get('/{ptMember}', [App\Http\Controllers\PTMemberController::class, 'show'])->name('show');
+        Route::post('/{ptMember}/use-session', [App\Http\Controllers\PTMemberController::class, 'useSession'])->name('use-session');
+        Route::get('/{ptMember}/renew', [App\Http\Controllers\PTMemberController::class, 'renew'])->name('renew');
+        Route::post('/{ptMember}/renew', [App\Http\Controllers\PTMemberController::class, 'processRenewal'])->name('process-renewal');
+        Route::get('/{ptMember}/add-member', [App\Http\Controllers\PTMemberController::class, 'addMember'])->name('add-member');
+        Route::post('/{ptMember}/add-member', [App\Http\Controllers\PTMemberController::class, 'storeAddMember'])->name('store-add-member');
+        
+        // Admin only actions
+        Route::middleware(['role:admin'])->group(function () {
+            Route::get('/{ptMember}/edit', [App\Http\Controllers\PTMemberController::class, 'edit'])->name('edit');
+            Route::put('/{ptMember}', [App\Http\Controllers\PTMemberController::class, 'update'])->name('update');
+            Route::delete('/{ptMember}', [App\Http\Controllers\PTMemberController::class, 'destroy'])->name('destroy');
+        });
     });
     
     // Daily Users - accessible by both admin and staff
@@ -125,6 +139,7 @@ Route::middleware(['auth', 'redirect.pt'])->group(function () {
         Route::delete('products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
         
         Route::resource('personal-trainers', App\Http\Controllers\PersonalTrainerController::class);
+        Route::resource('packets', App\Http\Controllers\PacketController::class);
         
         // Branch Management
         Route::resource('branches', App\Http\Controllers\BranchController::class);

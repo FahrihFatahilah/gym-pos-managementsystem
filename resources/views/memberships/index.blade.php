@@ -23,6 +23,7 @@
                             <tr>
                                 <th>Member</th>
                                 <th>Tipe</th>
+                                <th>Kategori</th>
                                 <th>Mulai</th>
                                 <th>Berakhir</th>
                                 <th>Harga</th>
@@ -37,6 +38,11 @@
                                     <td>
                                         <span class="badge bg-info">
                                             {{ $membership->getTypeLabel() }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{{ $membership->category === 'pt' ? 'warning' : 'secondary' }}">
+                                            {{ $membership->getCategoryLabel() }}
                                         </span>
                                     </td>
                                     <td>{{ formatTanggal($membership->start_date) }}</td>
@@ -60,7 +66,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="7" class="text-center">Belum ada data membership</td>
+                                    <td colspan="8" class="text-center">Belum ada data membership</td>
                                 </tr>
                             @endforelse
                         </tbody>

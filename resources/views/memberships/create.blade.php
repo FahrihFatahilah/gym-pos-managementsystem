@@ -42,6 +42,18 @@
                         @enderror
                     </div>
 
+                    <div class="mb-3">
+                        <label for="category" class="form-label">Kategori <span class="text-danger">*</span></label>
+                        <select class="form-select @error('category') is-invalid @enderror" id="category" name="category" required>
+                            <option value="">Pilih Kategori</option>
+                            <option value="regular" {{ old('category') == 'regular' ? 'selected' : '' }}>Regular</option>
+                            <option value="pt" {{ old('category') == 'pt' ? 'selected' : '' }}>With PT</option>
+                        </select>
+                        @error('category')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">

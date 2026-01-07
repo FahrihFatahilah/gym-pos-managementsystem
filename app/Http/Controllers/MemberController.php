@@ -41,7 +41,14 @@ class MemberController extends Controller
      */
     public function create()
     {
-        return view('members.create');
+        $personalTrainers = \App\Models\PersonalTrainer::where('is_active', true)->get();
+        $packets = \App\Models\Packet::where('is_active', true)
+            ->whereIn('type', ['membership', 'daily'])
+            ->orderBy('type')
+            ->orderBy('duration_days')
+            ->get();
+        
+        return view('members.create', compact('personalTrainers', 'packets'));
     }
 
     /**
@@ -56,16 +63,15 @@ class MemberController extends Controller
             'address' => 'nullable|string',
             'personal_trainer_id' => 'nullable|exists:personal_trainers,id',
             'fitness_goals' => 'nullable|string',
-            'membership_type' => 'required|in:daily,monthly,yearly,custom',
+            'packet_id' => 'required|exists:packets,id',
             'start_date' => 'required|date',
-            'end_date' => 'required|date|after_or_equal:start_date',
-            'membership_price' => 'required_if:membership_type,custom|nullable|numeric|min:0',
             'payment_method' => 'required|in:cash,qris,transfer'
         ]);
 
-        $gymSettings = \App\Models\GymSetting::getSettings();
-        $ptPrice = 0;
+        $packet = \App\Models\Packet::findOrFail($request->packet_id);
+        $endDate = \Carbon\Carbon::parse($request->start_date)->addDays($packet->duration_days);
         
+        $ptPrice = 0;
         if ($request->personal_trainer_id) {
             $trainer = \App\Models\PersonalTrainer::find($request->personal_trainer_id);
             $ptPrice = $trainer ? $trainer->hourly_rate : 0;
@@ -82,21 +88,16 @@ class MemberController extends Controller
             'status' => 'active'
         ]);
 
-        // Determine membership price
-        $price = match($request->membership_type) {
-            'daily' => $gymSettings->membership_daily_price + $ptPrice,
-            'monthly' => $gymSettings->membership_monthly_price + $ptPrice,
-            'yearly' => $gymSettings->membership_yearly_price + $ptPrice,
-            'custom' => $request->membership_price + $ptPrice
-        };
+        $totalPrice = $packet->price + $ptPrice;
 
         // Create membership
         $membership = Membership::create([
             'member_id' => $member->id,
-            'type' => $request->membership_type,
+            'packet_id' => $packet->id,
+            'type' => $packet->type,
             'start_date' => $request->start_date,
-            'end_date' => $request->end_date,
-            'price' => $price,
+            'end_date' => $endDate,
+            'price' => $totalPrice,
             'status' => 'active'
         ]);
 
@@ -104,11 +105,12 @@ class MemberController extends Controller
         Payment::create([
             'member_id' => $member->id,
             'membership_id' => $membership->id,
-            'amount' => $price,
+            'amount' => $totalPrice,
             'payment_method' => $request->payment_method,
             'status' => 'completed',
             'payment_date' => now(),
-            'notes' => 'Pembayaran membership saat pendaftaran'
+            'notes' => 'Pembayaran membership saat pendaftaran',
+            'user_id' => auth()->id()
         ]);
 
         return redirect()->route('members.index')

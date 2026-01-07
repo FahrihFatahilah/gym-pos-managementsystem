@@ -742,17 +742,24 @@
                         
                         @if(auth()->check() && auth()->user()->hasPermission('members'))
                         <li class="nav-item">
-                            <a class="nav-link has-submenu {{ request()->routeIs('members.*') ? 'active expanded' : '' }}" 
+                            <a class="nav-link has-submenu {{ request()->routeIs('members.*') || request()->routeIs('pt-members.*') ? 'active expanded' : '' }}" 
                                href="#" onclick="toggleSubmenu(event, 'member-submenu')">
                                 <i class="fas fa-users me-2"></i>
                                 Member
                             </a>
-                            <ul class="nav flex-column submenu {{ request()->routeIs('members.*') ? 'show' : '' }}" id="member-submenu">
+                            <ul class="nav flex-column submenu {{ request()->routeIs('members.*') || request()->routeIs('pt-members.*') ? 'show' : '' }}" id="member-submenu">
                                 <li class="nav-item">
                                     <a class="nav-link {{ request()->routeIs('members.index') ? 'active' : '' }}" 
                                        href="{{ route('members.index') }}">
                                         <i class="fas fa-list me-2"></i>
                                         Daftar Member
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link {{ request()->routeIs('pt-members.*') ? 'active' : '' }}" 
+                                       href="{{ route('pt-members.index') }}">
+                                        <i class="fas fa-dumbbell me-2"></i>
+                                        Member PT
                                     </a>
                                 </li>
                                 <li class="nav-item">
@@ -857,6 +864,16 @@
                                href="{{ route('personal-trainers.index') }}">
                                 <i class="fas fa-dumbbell me-2"></i>
                                 Personal Trainer
+                            </a>
+                        </li>
+                        @endif
+                        
+                        @if(auth()->check() && auth()->user()->hasPermission('settings'))
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('packets.*') ? 'active' : '' }}" 
+                               href="{{ route('packets.index') }}">
+                                <i class="fas fa-box me-2"></i>
+                                Master Paket
                             </a>
                         </li>
                         @endif

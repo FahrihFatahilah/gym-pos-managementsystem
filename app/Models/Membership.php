@@ -12,7 +12,9 @@ class Membership extends Model
 
     protected $fillable = [
         'member_id',
+        'packet_id',
         'type',
+        'category',
         'start_date',
         'end_date',
         'price',
@@ -29,6 +31,12 @@ class Membership extends Model
     public function member()
     {
         return $this->belongsTo(Member::class);
+    }
+
+    // Relasi dengan Packet
+    public function packet()
+    {
+        return $this->belongsTo(Packet::class);
     }
 
     // Relasi dengan Payment
@@ -60,6 +68,16 @@ class Membership extends Model
             'yearly' => 'Tahunan',
             'custom' => 'Custom',
             default => $this->type
+        };
+    }
+
+    // Get category label
+    public function getCategoryLabel()
+    {
+        return match($this->category) {
+            'regular' => 'Regular',
+            'pt' => 'With PT',
+            default => $this->category
         };
     }
 }

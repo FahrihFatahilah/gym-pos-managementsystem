@@ -1,398 +1,155 @@
 @extends('layouts.app')
 
-@section('page-title', 'Member Saya')
-
 @section('content')
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
-            <div class="page-header mb-4">
-                <div class="row align-items-center">
-                    <div class="col-md-6">
-                        <h2 class="page-title">
-                            <i class="fas fa-users gradient-icon"></i>
-                            Member Saya
-                        </h2>
-                        <p class="page-subtitle">Kelola dan pantau perkembangan member yang Anda latih</p>
-                    </div>
-                    <div class="col-md-6 text-md-end">
-                        <div class="stats-cards">
-                            <div class="stat-item">
-                                <div class="stat-number">{{ $members->total() }}</div>
-                                <div class="stat-label">Total Member</div>
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="card-title">Member PT</h3>
+                    <a href="{{ route('pt-members.create') }}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Tambah Member PT
+                    </a>
+                </div>
+                
+                <div class="card-body">
+                    <!-- Search and Filter Form -->
+                    <form method="GET" class="mb-3">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <input type="text" name="search" class="form-control" placeholder="Cari nama atau telepon..." value="{{ request('search') }}">
+                            </div>
+                            <div class="col-md-3">
+                                <select name="status" class="form-control">
+                                    <option value="">Semua Status</option>
+                                    <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Aktif</option>
+                                    <option value="expired" {{ request('status') == 'expired' ? 'selected' : '' }}>Expired</option>
+                                    <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Selesai</option>
+                                </select>
+                            </div>
+                            @if(auth()->user()->role === 'admin')
+                            <div class="col-md-3">
+                                <select name="trainer_id" class="form-control">
+                                    <option value="">Semua Trainer</option>
+                                    @foreach($trainers as $trainer)
+                                        <option value="{{ $trainer->id }}" {{ request('trainer_id') == $trainer->id ? 'selected' : '' }}>
+                                            {{ $trainer->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            @endif
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-secondary">Filter</button>
+                                <a href="{{ route('pt-members.index') }}" class="btn btn-outline-secondary">Reset</a>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="card members-card">
-                <div class="card-header gradient-header">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-list me-2"></i>
-                        Daftar Member
-                    </h5>
-                </div>
-                <div class="card-body p-0">
-                    @if($members->count() > 0)
-                        <div class="members-grid">
-                            @foreach($members as $member)
-                            <div class="member-card" onclick="window.location='{{ route('pt-members.show', $member) }}'">
-                                <div class="member-card-header">
-                                    <div class="member-avatar-small">
-                                        <i class="fas fa-user"></i>
-                                    </div>
-                                    <div class="member-status-indicator status-{{ $member->status }}"></div>
-                                </div>
-                                
-                                <div class="member-card-body">
-                                    <h6 class="member-card-name">{{ $member->name }}</h6>
-                                    
-                                    <div class="member-card-info">
-                                        @if($member->phone)
-                                        <div class="info-row">
-                                            <i class="fas fa-phone"></i>
-                                            <span>{{ $member->phone }}</span>
-                                        </div>
-                                        @endif
-                                        
-                                        @if($member->email)
-                                        <div class="info-row">
-                                            <i class="fas fa-envelope"></i>
-                                            <span>{{ Str::limit($member->email, 20) }}</span>
-                                        </div>
-                                        @endif
-                                    </div>
-                                    
-                                    <div class="membership-info">
-                                        @if($member->activeMembership)
-                                            <div class="membership-active">
-                                                <i class="fas fa-calendar-check"></i>
-                                                <span>Berakhir {{ formatTanggal($member->activeMembership->end_date) }}</span>
-                                            </div>
+                    </form>
+
+                    <!-- Members Table -->
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Nama</th>
+                                    <th>Telepon</th>
+                                    <th>Trainer</th>
+                                    <th>Paket</th>
+                                    <th>Sesi</th>
+                                    <th>Periode</th>
+                                    <th>Status</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($ptMembers as $member)
+                                <tr>
+                                    <td>{{ $member->name }}</td>
+                                    <td>{{ $member->phone }}</td>
+                                    <td>{{ $member->personalTrainer->name }}</td>
+                                    <td>
+                                        @php
+                                            $badgeClass = match($member->packet->type) {
+                                                'individual' => 'bg-primary text-white',
+                                                'couple' => 'bg-success text-white', 
+                                                'group' => 'bg-warning text-dark',
+                                                default => 'bg-info text-white'
+                                            };
+                                        @endphp
+                                        <span class="badge {{ $badgeClass }}">{{ ucfirst($member->packet->type) }}</span>
+                                        {{ $member->packet->name }}
+                                    </td>
+                                    <td>
+                                        <span class="badge {{ $member->sessions_remaining > 0 ? 'bg-success' : 'bg-danger' }} text-white">
+                                            {{ $member->sessions_remaining }}/{{ $member->total_sessions }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {{ formatTanggal($member->start_date) }} - {{ formatTanggal($member->end_date) }}
+                                    </td>
+                                    <td>
+                                        @if($member->status === 'active')
+                                            <span class="badge bg-success text-white">Aktif</span>
+                                        @elseif($member->status === 'expired')
+                                            <span class="badge bg-warning text-dark">Expired</span>
                                         @else
-                                            <div class="membership-inactive">
-                                                <i class="fas fa-calendar-times"></i>
-                                                <span>Tidak ada membership aktif</span>
-                                            </div>
+                                            <span class="badge bg-secondary text-white">Selesai</span>
                                         @endif
-                                    </div>
-                                </div>
-                                
-                                <div class="member-card-footer">
-                                    <span class="status-badge status-{{ $member->status }}">
-                                        <i class="fas fa-{{ $member->status === 'active' ? 'check-circle' : 'times-circle' }}"></i>
-                                        {{ ucfirst($member->status) }}
-                                    </span>
-                                    <div class="card-actions">
-                                        <button class="btn-action" title="Lihat Detail">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            @endforeach
-                        </div>
-                        
-                        <div class="pagination-wrapper">
-                            {{ $members->links() }}
-                        </div>
-                    @else
-                        <div class="empty-state-large">
-                            <div class="empty-icon">
-                                <i class="fas fa-users"></i>
-                            </div>
-                            <h4>Belum Ada Member</h4>
-                            <p>Anda belum memiliki member yang ditugaskan. Hubungi admin untuk menugaskan member kepada Anda.</p>
-                        </div>
-                    @endif
+                                    </td>
+                                    <td>
+                                        <div class="d-flex flex-wrap gap-1">
+                                            <a href="{{ route('pt-members.show', $member) }}" class="btn btn-xs btn-info" title="Lihat Detail">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            @if($member->status === 'active' && $member->sessions_remaining > 0)
+                                                <form action="{{ route('pt-members.use-session', $member) }}" method="POST" class="d-inline">
+                                                    @csrf
+                                                    <button type="submit" class="btn btn-xs btn-warning" onclick="return confirm('Gunakan 1 sesi?')" title="Gunakan Sesi">
+                                                        <i class="fas fa-minus"></i>
+                                                    </button>
+                                                </form>
+                                            @endif
+                                            @if($member->status === 'completed' || $member->sessions_remaining <= 0)
+                                                <a href="{{ route('pt-members.renew', $member) }}" class="btn btn-xs btn-success" title="Perpanjang">
+                                                    <i class="fas fa-redo"></i>
+                                                </a>
+                                            @endif
+                                            @if($member->packet->type === 'group')
+                                                <a href="{{ route('pt-members.add-member', $member) }}" class="btn btn-xs" style="background-color: #6f42c1; color: white;" title="Tambah Member">
+                                                    <i class="fas fa-user-plus"></i>
+                                                </a>
+                                            @endif
+                                            @can('update', $member)
+                                                <a href="{{ route('pt-members.edit', $member) }}" class="btn btn-xs btn-primary" title="Edit">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                            @endcan
+                                            @if(auth()->user()->role === 'admin')
+                                                <form action="{{ route('pt-members.destroy', $member) }}" method="POST" class="d-inline">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-xs btn-danger" onclick="return confirm('Hapus member ini?')" title="Hapus">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            @endif
+                                        </div>
+                                    </td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="8" class="text-center">Tidak ada data member PT</td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    {{ $ptMembers->appends(request()->query())->links() }}
                 </div>
             </div>
         </div>
     </div>
 </div>
-
-<style>
-.page-header {
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
-    padding: 2rem;
-    border-radius: 12px;
-    color: white;
-    margin-bottom: 2rem;
-    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.2);
-}
-
-.page-title {
-    font-size: 2.2rem;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-.gradient-icon {
-    color: rgba(255, 255, 255, 0.9);
-    font-size: 2.5rem;
-}
-
-.page-subtitle {
-    font-size: 1.1rem;
-    opacity: 0.9;
-    margin-bottom: 0;
-}
-
-.stats-cards {
-    display: flex;
-    gap: 1rem;
-    justify-content: flex-end;
-}
-
-.stat-item {
-    background: rgba(255, 255, 255, 0.15);
-    padding: 1rem 1.5rem;
-    border-radius: 8px;
-    text-align: center;
-    backdrop-filter: blur(10px);
-}
-
-.stat-number {
-    font-size: 2rem;
-    font-weight: 700;
-    line-height: 1;
-}
-
-.stat-label {
-    font-size: 0.9rem;
-    opacity: 0.8;
-    margin-top: 0.25rem;
-}
-
-.members-card {
-    border: none;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-    border-radius: 12px;
-    overflow: hidden;
-}
-
-.gradient-header {
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--info-color) 100%);
-    color: white;
-    border: none;
-    padding: 1.5rem;
-}
-
-.members-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 1.5rem;
-    padding: 1.5rem;
-}
-
-.member-card {
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    transition: all 0.2s ease;
-    cursor: pointer;
-    overflow: hidden;
-    border: 1px solid var(--gray-200);
-}
-
-.member-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
-    border-color: var(--primary-color);
-}
-
-.member-card-header {
-    background: var(--gray-50);
-    padding: 1.5rem;
-    position: relative;
-    text-align: center;
-}
-
-.member-avatar-small {
-    width: 60px;
-    height: 60px;
-    background: var(--primary-color);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto;
-    color: white;
-    font-size: 1.5rem;
-    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
-}
-
-.member-status-indicator {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    border: 2px solid white;
-}
-
-.member-status-indicator.status-active {
-    background: var(--success-color);
-    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
-}
-
-.member-status-indicator.status-expired {
-    background: var(--danger-color);
-    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
-}
-
-.member-card-body {
-    padding: 1.5rem;
-}
-
-.member-card-name {
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: var(--gray-800);
-    margin-bottom: 1rem;
-    text-align: center;
-}
-
-.member-card-info {
-    margin-bottom: 1rem;
-}
-
-.info-row {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 0.5rem;
-    font-size: 0.9rem;
-    color: var(--gray-600);
-}
-
-.info-row i {
-    width: 16px;
-    color: var(--gray-500);
-}
-
-.membership-info {
-    padding: 0.75rem;
-    border-radius: 6px;
-    margin-bottom: 1rem;
-}
-
-.membership-active {
-    background: rgba(16, 185, 129, 0.1);
-    color: var(--success-color);
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.85rem;
-    font-weight: 600;
-}
-
-.membership-inactive {
-    background: rgba(239, 68, 68, 0.1);
-    color: var(--danger-color);
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.85rem;
-    font-weight: 600;
-}
-
-.member-card-footer {
-    padding: 1rem 1.5rem;
-    background: var(--gray-50);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-top: 1px solid var(--gray-200);
-}
-
-.status-badge {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    border-radius: 16px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    text-transform: uppercase;
-}
-
-.status-badge.status-active {
-    background: var(--success-color);
-    color: white;
-}
-
-.status-badge.status-expired {
-    background: var(--danger-color);
-    color: white;
-}
-
-.btn-action {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    border: none;
-    background: var(--primary-color);
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
-}
-
-.btn-action:hover {
-    transform: scale(1.1);
-    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
-}
-
-.empty-state-large {
-    text-align: center;
-    padding: 4rem 2rem;
-    color: var(--gray-500);
-}
-
-.empty-icon {
-    font-size: 4rem;
-    margin-bottom: 1.5rem;
-    opacity: 0.5;
-}
-
-.empty-state-large h4 {
-    color: var(--gray-700);
-    margin-bottom: 1rem;
-}
-
-.pagination-wrapper {
-    padding: 1.5rem;
-    border-top: 1px solid var(--gray-200);
-    background: var(--gray-50);
-}
-
-@media (max-width: 768px) {
-    .page-header {
-        text-align: center;
-    }
-    
-    .page-title {
-        font-size: 1.8rem;
-        justify-content: center;
-    }
-    
-    .stats-cards {
-        justify-content: center;
-        margin-top: 1rem;
-    }
-    
-    .members-grid {
-        grid-template-columns: 1fr;
-        gap: 1rem;
-        padding: 1rem;
-    }
-}
-</style>
 @endsection
