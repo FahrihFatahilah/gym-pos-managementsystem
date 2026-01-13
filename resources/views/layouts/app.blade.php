@@ -600,6 +600,29 @@
             background: linear-gradient(135deg, var(--secondary-color), #475569) !important;
         }
         
+        /* Pagination Styles - Specific to Laravel pagination */
+        nav[role="navigation"][aria-label="Pagination Navigation"] {
+            margin: 1rem 0;
+        }
+        
+        nav[role="navigation"][aria-label="Pagination Navigation"] svg {
+            width: 1rem !important;
+            height: 1rem !important;
+        }
+        
+        nav[role="navigation"][aria-label="Pagination Navigation"] img {
+            display: none !important;
+        }
+        
+        /* Show only desktop pagination */
+        nav[role="navigation"][aria-label="Pagination Navigation"] .sm\:hidden {
+            display: none !important;
+        }
+        
+        nav[role="navigation"][aria-label="Pagination Navigation"] .hidden.sm\:flex-1 {
+            display: flex !important;
+        }
+        
         .submenu {
             display: none;
             padding-left: 1rem;
@@ -831,11 +854,41 @@
                         
                         @if(auth()->check() && auth()->user()->hasPermission('reports'))
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('reports.*') ? 'active' : '' }}" 
-                               href="{{ route('reports.sales') }}">
+                            <a class="nav-link has-submenu {{ request()->routeIs('reports.*') ? 'active expanded' : '' }}" 
+                               href="#" onclick="toggleSubmenu(event, 'reports-submenu')">
                                 <i class="fas fa-chart-bar me-2"></i>
                                 Laporan
                             </a>
+                            <ul class="nav flex-column submenu {{ request()->routeIs('reports.*') ? 'show' : '' }}" id="reports-submenu">
+                                <li class="nav-item">
+                                    <a class="nav-link {{ request()->routeIs('reports.sales') ? 'active' : '' }}" 
+                                       href="{{ route('reports.sales') }}">
+                                        <i class="fas fa-chart-line me-2"></i>
+                                        Laporan Penjualan
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link {{ request()->routeIs('reports.pt-daily') ? 'active' : '' }}" 
+                                       href="{{ route('reports.pt-daily') }}">
+                                        <i class="fas fa-dumbbell me-2"></i>
+                                        PT Harian
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link {{ request()->routeIs('reports.members') ? 'active' : '' }}" 
+                                       href="{{ route('reports.members') }}">
+                                        <i class="fas fa-users me-2"></i>
+                                        Laporan Member
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link {{ request()->routeIs('reports.stocks') ? 'active' : '' }}" 
+                                       href="{{ route('reports.stocks') }}">
+                                        <i class="fas fa-boxes me-2"></i>
+                                        Laporan Stok
+                                    </a>
+                                </li>
+                            </ul>
                         </li>
                         @endif
                         

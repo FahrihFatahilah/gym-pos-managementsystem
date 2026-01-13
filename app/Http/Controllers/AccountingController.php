@@ -16,16 +16,24 @@ class AccountingController extends Controller
         $startDate = $request->get('start_date', Carbon::now()->startOfMonth());
         $endDate = $request->get('end_date', Carbon::now()->endOfMonth());
         
-        // Income
+        // Income berdasarkan transaction_date
         $posIncome = Transaction::whereBetween('created_at', [$startDate, $endDate])
             ->where('status', 'completed')
             ->sum('total_amount');
             
-        $membershipIncome = Payment::whereBetween('payment_date', [$startDate, $endDate])
-            ->where('status', 'completed')
-            ->sum('amount');
+        $ptMemberIncome = \App\Models\PTMember::whereNotNull('transaction_date')
+            ->whereBetween('transaction_date', [$startDate, $endDate])
+            ->sum('amount_paid');
             
-        $totalIncome = $posIncome + $membershipIncome;
+        $membershipIncome = \App\Models\Membership::whereNotNull('transaction_date')
+            ->whereBetween('transaction_date', [$startDate, $endDate])
+            ->sum('price');
+            
+        $dailyUserIncome = \App\Models\DailyUser::whereNotNull('transaction_date')
+            ->whereBetween('transaction_date', [$startDate, $endDate])
+            ->sum('amount_paid');
+            
+        $totalIncome = $posIncome + $ptMemberIncome + $membershipIncome + $dailyUserIncome;
         
         // Expenses
         $expenses = Expense::whereBetween('expense_date', [$startDate, $endDate])
@@ -39,7 +47,9 @@ class AccountingController extends Controller
         return view('accounting.simple', compact(
             'totalIncome', 
             'posIncome', 
-            'membershipIncome', 
+            'ptMemberIncome',
+            'membershipIncome',
+            'dailyUserIncome', 
             'totalExpenses', 
             'netProfit',
             'expenses',
@@ -157,14 +167,22 @@ class AccountingController extends Controller
         $startDate = $request->get('start_date', Carbon::now()->startOfMonth());
         $endDate = $request->get('end_date', Carbon::now()->endOfMonth());
         
-        // Income breakdown
+        // Income breakdown berdasarkan transaction_date
         $posIncome = Transaction::whereBetween('created_at', [$startDate, $endDate])
             ->where('status', 'completed')
             ->sum('total_amount');
             
-        $membershipIncome = Payment::whereBetween('payment_date', [$startDate, $endDate])
-            ->where('status', 'completed')
-            ->sum('amount');
+        $ptMemberIncome = \App\Models\PTMember::whereNotNull('transaction_date')
+            ->whereBetween('transaction_date', [$startDate, $endDate])
+            ->sum('amount_paid');
+            
+        $membershipIncome = \App\Models\Membership::whereNotNull('transaction_date')
+            ->whereBetween('transaction_date', [$startDate, $endDate])
+            ->sum('price');
+            
+        $dailyUserIncome = \App\Models\DailyUser::whereNotNull('transaction_date')
+            ->whereBetween('transaction_date', [$startDate, $endDate])
+            ->sum('amount_paid');
             
         // Expense breakdown by category
         $expensesByCategory = Expense::whereBetween('expense_date', [$startDate, $endDate])
@@ -172,13 +190,15 @@ class AccountingController extends Controller
             ->groupBy('category')
             ->get();
             
-        $totalIncome = $posIncome + $membershipIncome;
+        $totalIncome = $posIncome + $ptMemberIncome + $membershipIncome + $dailyUserIncome;
         $totalExpenses = $expensesByCategory->sum('total');
         $netProfit = $totalIncome - $totalExpenses;
         
         return view('accounting.profit-loss', compact(
             'posIncome',
+            'ptMemberIncome',
             'membershipIncome',
+            'dailyUserIncome',
             'totalIncome',
             'expensesByCategory',
             'totalExpenses',

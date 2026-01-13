@@ -17,11 +17,13 @@ class Member extends Model
         'address',
         'status',
         'personal_trainer_id',
-        'fitness_goals'
+        'fitness_goals',
+        'transaction_date'
     ];
 
     protected $casts = [
-        'status' => 'string'
+        'status' => 'string',
+        'transaction_date' => 'date'
     ];
 
     // Relasi dengan Membership

@@ -45,6 +45,7 @@
                 <!-- Filter -->
                 <form method="GET" class="mb-4">
                     <div class="row">
+                        @if(!$isStaff)
                         <div class="col-md-3">
                             <label class="form-label">Tanggal Mulai</label>
                             <input type="date" name="start_date" class="form-control" 
@@ -55,6 +56,14 @@
                             <input type="date" name="end_date" class="form-control" 
                                    value="{{ request('end_date', $endDate->format('Y-m-d')) }}">
                         </div>
+                        @else
+                        <div class="col-md-6">
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>Mode Staff:</strong> Hanya menampilkan data hari ini ({{ $startDate->format('d/m/Y') }})
+                            </div>
+                        </div>
+                        @endif
                         <div class="col-md-2">
                             <label class="form-label">Metode Bayar</label>
                             <select name="payment_method" class="form-control">
@@ -90,7 +99,7 @@
 
                 <!-- Summary -->
                 <div class="row mb-4">
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <div class="card bg-success text-white">
                             <div class="card-body">
                                 <div class="d-flex justify-content-between">
@@ -105,7 +114,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <div class="card bg-primary text-white">
                             <div class="card-body">
                                 <div class="d-flex justify-content-between">
@@ -125,8 +134,23 @@
                             <div class="card-body">
                                 <div class="d-flex justify-content-between">
                                     <div>
+                                        <h6>PT Members</h6>
+                                        <h4>Rp {{ number_format($totalPTMemberSales, 0, ',', '.') }}</h4>
+                                    </div>
+                                    <div class="align-self-center">
+                                        <i class="fas fa-dumbbell fa-2x"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-secondary text-white">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
                                         <h6>Membership</h6>
-                                        <h4>Rp {{ number_format($totalMembershipSales, 0, ',', '.') }}</h4>
+                                        <h4>Rp {{ number_format($totalMembershipTransactions, 0, ',', '.') }}</h4>
                                     </div>
                                     <div class="align-self-center">
                                         <i class="fas fa-id-card fa-2x"></i>
@@ -148,6 +172,19 @@
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Payment Method Breakdown -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h5 class="mb-3">
+                            <i class="fas fa-credit-card me-2"></i>
+                            Total Penjualan per Periode
+                        </h5>
+                        <div class="alert alert-info">
+                            <strong>Periode:</strong> {{ $startDate->format('d/m/Y') }} - {{ $endDate->format('d/m/Y') }}
                         </div>
                     </div>
                 </div>
@@ -198,51 +235,97 @@
                 
                 {{ $transactions->links() }}
 
-                <!-- Membership Payments Table -->
+                <!-- PT Members Table -->
                 <h5 class="mb-3">
-                    <i class="fas fa-id-card me-2"></i>
-                    Pembayaran Membership
+                    <i class="fas fa-dumbbell me-2"></i>
+                    PT Members (Berdasarkan Tanggal Transaksi)
                 </h5>
-                <div class="table-responsive">
+                <div class="table-responsive mb-5">
                     <table class="table table-bordered">
                         <thead>
                             <tr>
-                                <th>Tanggal</th>
-                                <th>Member</th>
-                                <th>Tipe Membership</th>
+                                <th>Tanggal Transaksi</th>
+                                <th>Nama</th>
+                                <th>Trainer</th>
+                                <th>Paket</th>
                                 <th>Jumlah</th>
                                 <th>Metode Bayar</th>
-                                <th>Keterangan</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse($membershipPayments as $payment)
+                            @forelse($ptMemberSales as $ptMember)
                                 <tr>
-                                    <td>{{ Carbon\Carbon::parse($payment->payment_date)->format('d/m/Y H:i') }}</td>
-                                    <td>{{ $payment->member->name }}</td>
-                                    <td>
-                                        <span class="badge bg-primary">
-                                            {{ ucfirst($payment->membership->type ?? 'N/A') }}
-                                        </span>
-                                    </td>
-                                    <td>Rp {{ number_format($payment->amount, 0, ',', '.') }}</td>
+                                    <td>{{ $ptMember->transaction_date ? $ptMember->transaction_date->format('d/m/Y') : '-' }}</td>
+                                    <td>{{ $ptMember->name }}</td>
+                                    <td>{{ $ptMember->personalTrainer->name }}</td>
+                                    <td>{{ $ptMember->packet->name }}</td>
+                                    <td>Rp {{ number_format($ptMember->amount_paid, 0, ',', '.') }}</td>
                                     <td>
                                         <span class="badge bg-info">
-                                            {{ ucfirst($payment->payment_method) }}
+                                            {{ ucfirst($ptMember->payment_method) }}
                                         </span>
                                     </td>
-                                    <td>{{ $payment->notes ?? '-' }}</td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="6" class="text-center">Tidak ada data pembayaran membership</td>
+                                    <td colspan="6" class="text-center">Tidak ada data PT Members</td>
                                 </tr>
                             @endforelse
                         </tbody>
                     </table>
                 </div>
                 
-                {{ $membershipPayments->appends(request()->query())->links() }}
+                {{ $ptMemberSales->appends(request()->query())->links() }}
+
+                <!-- Membership Transactions Table -->
+                <h5 class="mb-3">
+                    <i class="fas fa-id-card me-2"></i>
+                    Membership (Berdasarkan Tanggal Transaksi)
+                </h5>
+                <div class="table-responsive mb-5">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Tanggal Transaksi</th>
+                                <th>Member</th>
+                                <th>Tipe</th>
+                                <th>Kategori</th>
+                                <th>Harga</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($membershipTransactions as $membership)
+                                <tr>
+                                    <td>{{ $membership->transaction_date ? $membership->transaction_date->format('d/m/Y') : '-' }}</td>
+                                    <td>{{ $membership->member->name }}</td>
+                                    <td>
+                                        <span class="badge bg-primary">
+                                            {{ ucfirst($membership->type) }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary">
+                                            {{ ucfirst($membership->category ?? 'regular') }}
+                                        </span>
+                                    </td>
+                                    <td>Rp {{ number_format($membership->price, 0, ',', '.') }}</td>
+                                    <td>
+                                        <span class="badge bg-success">
+                                            {{ ucfirst($membership->status) }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="6" class="text-center">Tidak ada data Membership</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+                
+                {{ $membershipTransactions->appends(request()->query())->links() }}
 
                 <!-- Pengunjung Harians Table -->
                 <h5 class="mb-3">

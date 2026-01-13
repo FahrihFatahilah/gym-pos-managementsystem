@@ -18,13 +18,15 @@ class Membership extends Model
         'start_date',
         'end_date',
         'price',
-        'status'
+        'status',
+        'transaction_date'
     ];
 
     protected $casts = [
         'start_date' => 'date',
         'end_date' => 'date',
-        'price' => 'decimal:2'
+        'price' => 'decimal:2',
+        'transaction_date' => 'date'
     ];
 
     // Relasi dengan Member

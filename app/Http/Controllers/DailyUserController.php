@@ -68,7 +68,8 @@ class DailyUserController extends Controller
             'visit_date' => 'required|date',
             'daily_price_type' => 'required|in:regular,premium,custom',
             'custom_price' => 'required_if:daily_price_type,custom|nullable|numeric|min:0',
-            'payment_method' => 'required|in:cash,qris,transfer'
+            'payment_method' => 'required|in:cash,qris,transfer',
+            'transaction_date' => 'required|date'
         ]);
 
         $gymSettings = GymSetting::getSettings();
@@ -97,7 +98,8 @@ class DailyUserController extends Controller
             'amount_paid' => $totalAmount,
             'is_custom_price' => $isCustom,
             'custom_price' => $isCustom ? $request->custom_price : null,
-            'payment_method' => $request->payment_method
+            'payment_method' => $request->payment_method,
+            'transaction_date' => $request->transaction_date
         ]);
 
         return redirect()->route('daily-users.index')

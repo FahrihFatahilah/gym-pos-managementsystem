@@ -155,6 +155,16 @@
                                 @enderror
                             </div>
                         </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="transaction_date" class="form-label">Tanggal Transaksi <span class="text-danger">*</span></label>
+                                <input type="date" class="form-control @error('transaction_date') is-invalid @enderror" 
+                                       id="transaction_date" name="transaction_date" value="{{ old('transaction_date', date('Y-m-d')) }}" required>
+                                @error('transaction_date')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
                     </div>
 
                     <div class="alert alert-info">

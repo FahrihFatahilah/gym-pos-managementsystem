@@ -68,7 +68,8 @@ class PTMemberController extends Controller
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
             'payment_method' => 'required|in:cash,qris,transfer',
-            'notes' => 'nullable|string'
+            'notes' => 'nullable|string',
+            'transaction_date' => 'required|date'
         ]);
 
         $packet = Packet::findOrFail($request->packet_id);
@@ -89,7 +90,8 @@ class PTMemberController extends Controller
             'payment_method' => $request->payment_method,
             'status' => 'active',
             'notes' => $request->notes,
-            'user_id' => auth()->id()
+            'user_id' => auth()->id(),
+            'transaction_date' => $request->transaction_date
         ]);
 
         return redirect()->route('pt-members.index')
@@ -168,6 +170,23 @@ class PTMemberController extends Controller
 
         return back()->with('success', 'Sesi berhasil digunakan. Sisa sesi: ' . $ptMember->sessions_remaining);
     }
+    
+    public function restoreSession(PTMember $ptMember)
+    {
+        // Only admin can restore sessions
+        if (auth()->user()->role !== 'admin') {
+            return back()->with('error', 'Hanya admin yang dapat mengembalikan sesi.');
+        }
+        
+        if ($ptMember->sessions_remaining >= $ptMember->total_sessions) {
+            return back()->with('error', 'Sesi sudah maksimal.');
+        }
+
+        $ptMember->increment('sessions_remaining');
+        $ptMember->updateStatus();
+
+        return back()->with('success', 'Sesi berhasil dikembalikan. Sisa sesi: ' . $ptMember->sessions_remaining);
+    }
 
     public function renew(PTMember $ptMember)
     {
@@ -188,6 +207,7 @@ class PTMemberController extends Controller
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
             'payment_method' => 'required|in:cash,qris,transfer',
+            'transaction_date' => 'required|date'
         ]);
 
         $packet = Packet::findOrFail($request->packet_id);
@@ -200,7 +220,8 @@ class PTMemberController extends Controller
             'total_sessions' => $packet->sessions,
             'amount_paid' => $packet->price,
             'payment_method' => $request->payment_method,
-            'status' => 'active'
+            'status' => 'active',
+            'transaction_date' => $request->transaction_date
         ]);
 
         return redirect()->route('pt-members.index')
@@ -225,6 +246,7 @@ class PTMemberController extends Controller
             'email' => 'nullable|email',
             'additional_fee' => 'required|numeric|min:0',
             'payment_method' => 'required|in:cash,qris,transfer',
+            'transaction_date' => 'required|date'
         ]);
 
         // Create new PT member with same packet and trainer
@@ -242,7 +264,8 @@ class PTMemberController extends Controller
             'payment_method' => $request->payment_method,
             'status' => 'active',
             'notes' => 'Member tambahan dari group: ' . $ptMember->name,
-            'user_id' => auth()->id()
+            'user_id' => auth()->id(),
+            'transaction_date' => $request->transaction_date
         ]);
 
         return redirect()->route('pt-members.index')

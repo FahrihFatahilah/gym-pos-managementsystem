@@ -123,10 +123,10 @@ class User extends Authenticatable
                 'products' => true,
                 'pos' => true,
                 'stocks' => true,
-                'reports' => false,
+                'reports' => true,
                 'branches' => false,
                 'users' => false,
-                'settings' => false,
+                'settings' => true,
                 'my_members' => false
             ],
             'owner' => [

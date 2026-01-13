@@ -8,9 +8,31 @@ use Illuminate\Http\Request;
 
 class MembershipController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $memberships = Membership::with('member')->latest()->paginate(10);
+        $query = \App\Models\Membership::with(['member', 'payments']);
+        
+        // Search by member name or phone
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->whereHas('member', function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('phone', 'like', "%{$search}%");
+            });
+        }
+        
+        // Filter by category
+        if ($request->filled('category')) {
+            $query->where('category', $request->category);
+        }
+        
+        // Filter by status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+        
+        $memberships = $query->latest()->paginate(10);
+        
         return view('memberships.index', compact('memberships'));
     }
 
@@ -28,7 +50,8 @@ class MembershipController extends Controller
             'category' => 'required|in:regular,pt',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after:start_date',
-            'price' => 'required|numeric|min:0'
+            'price' => 'required|numeric|min:0',
+            'transaction_date' => 'required|date'
         ]);
 
         Membership::create($request->all());
@@ -55,7 +78,8 @@ class MembershipController extends Controller
             'category' => 'required|in:regular,pt',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after:start_date',
-            'price' => 'required|numeric|min:0'
+            'price' => 'required|numeric|min:0',
+            'transaction_date' => 'required|date'
         ]);
 
         $membership->update($request->all());

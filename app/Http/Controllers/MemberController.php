@@ -21,8 +21,7 @@ class MemberController extends Controller
             $search = $request->search;
             $query->where(function($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('phone', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+                  ->orWhere('phone', 'like', "%{$search}%");
             });
         }
         
@@ -65,7 +64,8 @@ class MemberController extends Controller
             'fitness_goals' => 'nullable|string',
             'packet_id' => 'required|exists:packets,id',
             'start_date' => 'required|date',
-            'payment_method' => 'required|in:cash,qris,transfer'
+            'payment_method' => 'required|in:cash,qris,transfer',
+            'transaction_date' => 'required|date'
         ]);
 
         $packet = \App\Models\Packet::findOrFail($request->packet_id);
@@ -85,7 +85,8 @@ class MemberController extends Controller
             'address' => $request->address,
             'personal_trainer_id' => $request->personal_trainer_id,
             'fitness_goals' => $request->fitness_goals,
-            'status' => 'active'
+            'status' => 'active',
+            'transaction_date' => $request->transaction_date
         ]);
 
         $totalPrice = $packet->price + $ptPrice;
@@ -98,7 +99,8 @@ class MemberController extends Controller
             'start_date' => $request->start_date,
             'end_date' => $endDate,
             'price' => $totalPrice,
-            'status' => 'active'
+            'status' => 'active',
+            'transaction_date' => $request->transaction_date
         ]);
 
         // Create payment record
@@ -206,7 +208,8 @@ class MemberController extends Controller
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
             'membership_price' => 'required_if:membership_type,custom|nullable|numeric|min:0',
-            'payment_method' => 'required|in:cash,qris,transfer'
+            'payment_method' => 'required|in:cash,qris,transfer',
+            'transaction_date' => 'required|date'
         ]);
 
         // Determine membership price
@@ -224,7 +227,8 @@ class MemberController extends Controller
             'start_date' => $request->start_date,
             'end_date' => $request->end_date,
             'price' => $price,
-            'status' => 'active'
+            'status' => 'active',
+            'transaction_date' => $request->transaction_date
         ]);
 
         // Create payment record

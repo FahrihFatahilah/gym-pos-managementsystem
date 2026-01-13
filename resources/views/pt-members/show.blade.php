@@ -16,6 +16,14 @@
                                 </button>
                             </form>
                         @endif
+                        @if(auth()->user()->role === 'admin' && $ptMember->sessions_remaining < $ptMember->total_sessions)
+                            <form action="{{ route('pt-members.restore-session', $ptMember) }}" method="POST" class="d-inline">
+                                @csrf
+                                <button type="submit" class="btn btn-info" onclick="return confirm('Kembalikan 1 sesi?')">
+                                    <i class="fas fa-plus"></i> Kembalikan Sesi
+                                </button>
+                            </form>
+                        @endif
                         @can('update', $ptMember)
                             <a href="{{ route('pt-members.edit', $ptMember) }}" class="btn btn-primary">
                                 <i class="fas fa-edit"></i> Edit

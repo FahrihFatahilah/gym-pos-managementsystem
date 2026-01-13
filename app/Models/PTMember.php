@@ -22,13 +22,15 @@ class PTMember extends Model
         'payment_method',
         'status',
         'notes',
-        'user_id'
+        'user_id',
+        'transaction_date'
     ];
 
     protected $casts = [
         'start_date' => 'date',
         'end_date' => 'date',
-        'amount_paid' => 'decimal:2'
+        'amount_paid' => 'decimal:2',
+        'transaction_date' => 'date'
     ];
 
     public function personalTrainer()

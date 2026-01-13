@@ -17,6 +17,35 @@
                 </a>
             </div>
             <div class="card-body">
+                <!-- Search Form -->
+                <form method="GET" class="mb-4">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <input type="text" name="search" class="form-control" 
+                                   placeholder="Cari berdasarkan nama atau nomor HP..." 
+                                   value="{{ request('search') }}">
+                        </div>
+                        <div class="col-md-3">
+                            <select name="category" class="form-select">
+                                <option value="">Semua Kategori</option>
+                                <option value="regular" {{ request('category') == 'regular' ? 'selected' : '' }}>Regular</option>
+                                <option value="pt" {{ request('category') == 'pt' ? 'selected' : '' }}>With PT</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select name="status" class="form-select">
+                                <option value="">Semua Status</option>
+                                <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
+                                <option value="expired" {{ request('status') == 'expired' ? 'selected' : '' }}>Expired</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-search"></i> Cari
+                            </button>
+                        </div>
+                    </div>
+                </form>
                 <div class="table-responsive">
                     <table class="table table-bordered">
                         <thead>
@@ -72,7 +101,7 @@
                         </tbody>
                     </table>
                 </div>
-                {{ $memberships->links() }}
+                {{ $memberships->appends(request()->query())->links() }}
             </div>
         </div>
     </div>

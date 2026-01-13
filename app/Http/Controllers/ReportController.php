@@ -18,8 +18,17 @@ class ReportController extends Controller
 {
     public function sales(Request $request)
     {
-        $startDate = $request->get('start_date') ? Carbon::parse($request->get('start_date')) : Carbon::now()->startOfMonth();
-        $endDate = $request->get('end_date') ? Carbon::parse($request->get('end_date')) : Carbon::now()->endOfMonth();
+        // Staff can only see today's data
+        $isStaff = auth()->user()->role === 'staff';
+        
+        if ($isStaff) {
+            $startDate = Carbon::today();
+            $endDate = Carbon::today();
+        } else {
+            $startDate = $request->get('start_date') ? Carbon::parse($request->get('start_date')) : Carbon::now()->startOfMonth();
+            $endDate = $request->get('end_date') ? Carbon::parse($request->get('end_date')) : Carbon::now()->endOfMonth();
+        }
+        
         $staffId = $request->get('staff_id');
         $paymentMethod = $request->get('payment_method');
         
@@ -46,50 +55,117 @@ class ReportController extends Controller
             })
             ->sum('total_amount');
             
-        // Membership Payments
-        $membershipPayments = \App\Models\Payment::with(['member', 'membership'])
-            ->whereBetween('payment_date', [$startDate, $endDate])
-            ->where('status', 'completed')
+        // PT Members berdasarkan transaction_date
+        $ptMemberSales = \App\Models\PTMember::with(['personalTrainer', 'packet'])
+            ->whereNotNull('transaction_date')
+            ->whereBetween('transaction_date', [$startDate, $endDate])
             ->when($paymentMethod, function($query, $paymentMethod) {
                 return $query->where('payment_method', $paymentMethod);
             })
-            ->latest('payment_date')
-            ->paginate(15, ['*'], 'membership_page');
+            ->latest('transaction_date')
+            ->paginate(15, ['*'], 'pt_page');
             
-        $totalMembershipSales = \App\Models\Payment::whereBetween('payment_date', [$startDate, $endDate])
-            ->where('status', 'completed')
-            ->when($paymentMethod, function($query, $paymentMethod) {
-                return $query->where('payment_method', $paymentMethod);
-            })
-            ->sum('amount');
-            
-        // Pengunjung Harians
-        $dailyUsers = \App\Models\DailyUser::with('personalTrainer')
-            ->whereBetween('visit_date', [$startDate, $endDate])
-            ->when($paymentMethod, function($query, $paymentMethod) {
-                return $query->where('payment_method', $paymentMethod);
-            })
-            ->latest('visit_date')
-            ->paginate(15, ['*'], 'daily_page');
-            
-        $totalDailyUserSales = \App\Models\DailyUser::whereBetween('visit_date', [$startDate, $endDate])
+        $totalPTMemberSales = \App\Models\PTMember::whereNotNull('transaction_date')
+            ->whereBetween('transaction_date', [$startDate, $endDate])
             ->when($paymentMethod, function($query, $paymentMethod) {
                 return $query->where('payment_method', $paymentMethod);
             })
             ->sum('amount_paid');
             
-        $totalSales = $totalPosSales + $totalMembershipSales + $totalDailyUserSales;
+        // Membership berdasarkan transaction_date
+        $membershipTransactions = \App\Models\Membership::with(['member'])
+            ->whereNotNull('transaction_date')
+            ->whereBetween('transaction_date', [$startDate, $endDate])
+            ->latest('transaction_date')
+            ->paginate(15, ['*'], 'membership_trans_page');
             
+        $totalMembershipTransactions = \App\Models\Membership::whereNotNull('transaction_date')
+            ->whereBetween('transaction_date', [$startDate, $endDate])
+            ->sum('price');
+            
+        // Pengunjung Harians berdasarkan transaction_date
+        $dailyUsers = \App\Models\DailyUser::with('personalTrainer')
+            ->whereNotNull('transaction_date')
+            ->whereBetween('transaction_date', [$startDate, $endDate])
+            ->when($paymentMethod, function($query, $paymentMethod) {
+                return $query->where('payment_method', $paymentMethod);
+            })
+            ->latest('transaction_date')
+            ->paginate(15, ['*'], 'daily_page');
+            
+        $totalDailyUserSales = \App\Models\DailyUser::whereNotNull('transaction_date')
+            ->whereBetween('transaction_date', [$startDate, $endDate])
+            ->when($paymentMethod, function($query, $paymentMethod) {
+                return $query->where('payment_method', $paymentMethod);
+            })
+            ->sum('amount_paid');
+            
+        $totalSales = $totalPosSales + $totalPTMemberSales + $totalMembershipTransactions + $totalDailyUserSales;
+        
         return view('reports.sales', compact(
             'transactions', 
-            'membershipPayments',
+            'ptMemberSales',
+            'membershipTransactions',
             'dailyUsers',
             'totalSales', 
             'totalPosSales',
-            'totalMembershipSales',
+            'totalPTMemberSales',
+            'totalMembershipTransactions',
             'totalDailyUserSales',
             'startDate', 
-            'endDate'
+            'endDate',
+            'isStaff'
+        ));
+    }
+    
+    public function ptDaily(Request $request)
+    {
+        // Staff can only see today's data
+        $isStaff = auth()->user()->role === 'staff';
+        
+        if ($isStaff) {
+            $startDate = Carbon::today();
+            $endDate = Carbon::today();
+        } else {
+            $startDate = $request->get('start_date') ? Carbon::parse($request->get('start_date')) : Carbon::today();
+            $endDate = $request->get('end_date') ? Carbon::parse($request->get('end_date')) : Carbon::today();
+        }
+        
+        $trainerId = $request->get('trainer_id');
+        $paymentMethod = $request->get('payment_method');
+        
+        // PT Members berdasarkan transaction_date
+        $ptMembers = \App\Models\PTMember::with(['personalTrainer', 'packet'])
+            ->whereNotNull('transaction_date')
+            ->whereBetween('transaction_date', [$startDate, $endDate])
+            ->when($trainerId, function($query, $trainerId) {
+                return $query->where('personal_trainer_id', $trainerId);
+            })
+            ->when($paymentMethod, function($query, $paymentMethod) {
+                return $query->where('payment_method', $paymentMethod);
+            })
+            ->latest('transaction_date')
+            ->paginate(15);
+            
+        $totalPTSales = \App\Models\PTMember::whereNotNull('transaction_date')
+            ->whereBetween('transaction_date', [$startDate, $endDate])
+            ->when($trainerId, function($query, $trainerId) {
+                return $query->where('personal_trainer_id', $trainerId);
+            })
+            ->when($paymentMethod, function($query, $paymentMethod) {
+                return $query->where('payment_method', $paymentMethod);
+            })
+            ->sum('amount_paid');
+            
+        $trainers = \App\Models\PersonalTrainer::where('is_active', true)->get();
+            
+        return view('reports.pt-daily', compact(
+            'ptMembers',
+            'totalPTSales',
+            'trainers',
+            'startDate',
+            'endDate',
+            'isStaff'
         ));
     }
 
@@ -236,12 +312,13 @@ class ReportController extends Controller
         
         $memberships = \App\Models\Membership::with(['member', 'payments'])
             ->when($request->filled('start_date') && $request->filled('end_date'), function($query) use ($startDate, $endDate) {
-                return $query->whereBetween('created_at', [$startDate, $endDate]);
+                return $query->whereNotNull('transaction_date')
+                    ->whereBetween('transaction_date', [$startDate, $endDate]);
             })
             ->when($request->status, function($query, $status) {
                 return $query->where('status', $status);
             })
-            ->latest()
+            ->latest('transaction_date')
             ->paginate(15);
             
         return view('reports.memberships', compact('memberships', 'startDate', 'endDate'));
@@ -254,7 +331,8 @@ class ReportController extends Controller
         
         $memberships = \App\Models\Membership::with(['member', 'payments'])
             ->when($request->filled('start_date') && $request->filled('end_date'), function($query) use ($startDate, $endDate) {
-                return $query->whereBetween('created_at', [$startDate, $endDate]);
+                return $query->whereNotNull('transaction_date')
+                    ->whereBetween('transaction_date', [$startDate, $endDate]);
             })
             ->when($request->status, function($query, $status) {
                 return $query->where('status', $status);

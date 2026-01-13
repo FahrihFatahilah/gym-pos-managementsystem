@@ -127,6 +127,63 @@
     </div>
 </div>
 
+<!-- Payment Method Breakdown -->
+<div class="row">
+    <div class="col-12 mb-4">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-credit-card me-2"></i>
+                    Breakdown Pembayaran {{ $isStaff ? 'Hari Ini' : '' }}
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    @foreach($paymentBreakdown as $method => $data)
+                    <div class="col-md-4 mb-3">
+                        <div class="card border-0 bg-light">
+                            <div class="card-body text-center">
+                                <h5 class="card-title text-uppercase">
+                                    @if($method === 'cash')
+                                        <i class="fas fa-money-bill-wave text-success"></i> Cash
+                                    @elseif($method === 'qris')
+                                        <i class="fas fa-qrcode text-info"></i> QRIS
+                                    @elseif($method === 'transfer')
+                                        <i class="fas fa-university text-primary"></i> Transfer
+                                    @endif
+                                </h5>
+                                <div class="row text-center">
+                                    <div class="col-6">
+                                        <small class="text-muted">POS</small>
+                                        <div class="fw-bold">Rp {{ number_format($data['pos'], 0, ',', '.') }}</div>
+                                    </div>
+                                    <div class="col-6">
+                                        <small class="text-muted">Member</small>
+                                        <div class="fw-bold">Rp {{ number_format($data['membership'], 0, ',', '.') }}</div>
+                                    </div>
+                                    <div class="col-6">
+                                        <small class="text-muted">Daily</small>
+                                        <div class="fw-bold">Rp {{ number_format($data['daily'], 0, ',', '.') }}</div>
+                                    </div>
+                                    <div class="col-6">
+                                        <small class="text-muted">PT</small>
+                                        <div class="fw-bold">Rp {{ number_format($data['pt'], 0, ',', '.') }}</div>
+                                    </div>
+                                </div>
+                                <hr>
+                                <h6 class="text-success mb-0">
+                                    Total: Rp {{ number_format($data['total'], 0, ',', '.') }}
+                                </h6>
+                            </div>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="row">
     <!-- Sales Chart -->
     <div class="col-xl-8 col-lg-7">

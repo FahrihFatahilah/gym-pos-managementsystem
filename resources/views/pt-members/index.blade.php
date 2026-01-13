@@ -97,42 +97,57 @@
                                         @endif
                                     </td>
                                     <td>
-                                        <div class="d-flex flex-wrap gap-1">
-                                            <a href="{{ route('pt-members.show', $member) }}" class="btn btn-xs btn-info" title="Lihat Detail">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                            @if($member->status === 'active' && $member->sessions_remaining > 0)
-                                                <form action="{{ route('pt-members.use-session', $member) }}" method="POST" class="d-inline">
-                                                    @csrf
-                                                    <button type="submit" class="btn btn-xs btn-warning" onclick="return confirm('Gunakan 1 sesi?')" title="Gunakan Sesi">
-                                                        <i class="fas fa-minus"></i>
-                                                    </button>
-                                                </form>
-                                            @endif
-                                            @if($member->status === 'completed' || $member->sessions_remaining <= 0)
-                                                <a href="{{ route('pt-members.renew', $member) }}" class="btn btn-xs btn-success" title="Perpanjang">
-                                                    <i class="fas fa-redo"></i>
-                                                </a>
-                                            @endif
-                                            @if($member->packet->type === 'group')
-                                                <a href="{{ route('pt-members.add-member', $member) }}" class="btn btn-xs" style="background-color: #6f42c1; color: white;" title="Tambah Member">
-                                                    <i class="fas fa-user-plus"></i>
-                                                </a>
-                                            @endif
-                                            @can('update', $member)
-                                                <a href="{{ route('pt-members.edit', $member) }}" class="btn btn-xs btn-primary" title="Edit">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
-                                            @endcan
-                                            @if(auth()->user()->role === 'admin')
-                                                <form action="{{ route('pt-members.destroy', $member) }}" method="POST" class="d-inline">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-xs btn-danger" onclick="return confirm('Hapus member ini?')" title="Hapus">
-                                                        <i class="fas fa-trash"></i>
-                                                    </button>
-                                                </form>
-                                            @endif
+                                        <div class="dropdown" style="position: relative; z-index: 1000;">
+                                            <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                                <i class="fas fa-cog"></i> Aksi
+                                            </button>
+                                            <ul class="dropdown-menu" style="position: absolute; z-index: 9999; top: 100%; left: 0;">
+                                                <li><a class="dropdown-item" href="{{ route('pt-members.show', $member) }}">
+                                                    <i class="fas fa-eye"></i> Lihat Detail
+                                                </a></li>
+                                                
+                                                @if($member->status === 'active' && $member->sessions_remaining > 0)
+                                                <li>
+                                                    <form action="{{ route('pt-members.use-session', $member) }}" method="POST" class="d-inline">
+                                                        @csrf
+                                                        <button type="submit" class="dropdown-item" onclick="return confirm('Gunakan 1 sesi?')">
+                                                            <i class="fas fa-minus text-warning"></i> Gunakan Sesi
+                                                        </button>
+                                                    </form>
+                                                </li>
+                                                @endif
+                                                
+                                                @if($member->status === 'completed' || $member->sessions_remaining <= 0)
+                                                <li><a class="dropdown-item" href="{{ route('pt-members.renew', $member) }}">
+                                                    <i class="fas fa-redo text-success"></i> Perpanjang
+                                                </a></li>
+                                                @endif
+                                                
+                                                @if($member->packet->type === 'group')
+                                                <li><a class="dropdown-item" href="{{ route('pt-members.add-member', $member) }}">
+                                                    <i class="fas fa-user-plus text-purple"></i> Tambah Member
+                                                </a></li>
+                                                @endif
+                                                
+                                                @can('update', $member)
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li><a class="dropdown-item" href="{{ route('pt-members.edit', $member) }}">
+                                                    <i class="fas fa-edit text-primary"></i> Edit
+                                                </a></li>
+                                                @endcan
+                                                
+                                                @if(auth()->user()->role === 'admin')
+                                                <li>
+                                                    <form action="{{ route('pt-members.destroy', $member) }}" method="POST" class="d-inline">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="dropdown-item text-danger" onclick="return confirm('Hapus member ini?')">
+                                                            <i class="fas fa-trash"></i> Hapus
+                                                        </button>
+                                                    </form>
+                                                </li>
+                                                @endif
+                                            </ul>
                                         </div>
                                     </td>
                                 </tr>

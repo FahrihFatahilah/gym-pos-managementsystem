@@ -17,7 +17,8 @@ class DailyUser extends Model
         'amount_paid',
         'is_custom_price',
         'custom_price',
-        'payment_method'
+        'payment_method',
+        'transaction_date'
     ];
 
     protected $casts = [
@@ -25,7 +26,8 @@ class DailyUser extends Model
         'valid_until' => 'date',
         'amount_paid' => 'decimal:2',
         'custom_price' => 'decimal:2',
-        'is_custom_price' => 'boolean'
+        'is_custom_price' => 'boolean',
+        'transaction_date' => 'date'
     ];
 
     public function personalTrainer()

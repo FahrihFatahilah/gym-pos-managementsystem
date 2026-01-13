@@ -71,6 +71,7 @@ Route::middleware(['auth', 'redirect.pt'])->group(function () {
     // Reports
     Route::prefix('reports')->name('reports.')->group(function () {
         Route::get('/sales', [ReportController::class, 'sales'])->name('sales');
+        Route::get('/pt-daily', [ReportController::class, 'ptDaily'])->name('pt-daily');
         Route::get('/members', [ReportController::class, 'members'])->name('members');
         Route::get('/memberships', [ReportController::class, 'memberships'])->name('memberships');
         Route::get('/stocks', [ReportController::class, 'stocks'])->name('stocks');
@@ -101,6 +102,7 @@ Route::middleware(['auth', 'redirect.pt'])->group(function () {
         Route::post('/', [App\Http\Controllers\PTMemberController::class, 'store'])->name('store');
         Route::get('/{ptMember}', [App\Http\Controllers\PTMemberController::class, 'show'])->name('show');
         Route::post('/{ptMember}/use-session', [App\Http\Controllers\PTMemberController::class, 'useSession'])->name('use-session');
+        Route::post('/{ptMember}/restore-session', [App\Http\Controllers\PTMemberController::class, 'restoreSession'])->name('restore-session');
         Route::get('/{ptMember}/renew', [App\Http\Controllers\PTMemberController::class, 'renew'])->name('renew');
         Route::post('/{ptMember}/renew', [App\Http\Controllers\PTMemberController::class, 'processRenewal'])->name('process-renewal');
         Route::get('/{ptMember}/add-member', [App\Http\Controllers\PTMemberController::class, 'addMember'])->name('add-member');

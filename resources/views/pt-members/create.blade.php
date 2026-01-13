@@ -136,6 +136,15 @@
                                 </div>
 
                                 <div class="form-group">
+                                    <label for="transaction_date">Tanggal Transaksi *</label>
+                                    <input type="date" class="form-control @error('transaction_date') is-invalid @enderror" 
+                                           id="transaction_date" name="transaction_date" value="{{ old('transaction_date', date('Y-m-d')) }}" required>
+                                    @error('transaction_date')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <div class="form-group">
                                     <label for="notes">Catatan</label>
                                     <textarea class="form-control @error('notes') is-invalid @enderror" 
                                               id="notes" name="notes" rows="3">{{ old('notes') }}</textarea>

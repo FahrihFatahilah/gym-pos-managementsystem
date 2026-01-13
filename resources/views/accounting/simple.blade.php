@@ -12,11 +12,11 @@
                 <form method="GET" class="row g-3">
                     <div class="col-md-4">
                         <input type="date" name="start_date" class="form-control" 
-                               value="{{ request('start_date', $startDate->format('Y-m-d')) }}">
+                               value="{{ request('start_date', is_string($startDate) ? $startDate : $startDate->format('Y-m-d')) }}">
                     </div>
                     <div class="col-md-4">
                         <input type="date" name="end_date" class="form-control" 
-                               value="{{ request('end_date', $endDate->format('Y-m-d')) }}">
+                               value="{{ request('end_date', is_string($endDate) ? $endDate : $endDate->format('Y-m-d')) }}">
                     </div>
                     <div class="col-md-4">
                         <button type="submit" class="btn btn-primary">Filter</button>
@@ -29,35 +29,70 @@
 
 <!-- Summary -->
 <div class="row mb-4">
-    <div class="col-md-3">
+    <div class="col-md-2">
+        <div class="card bg-primary text-white">
+            <div class="card-body text-center">
+                <h6>POS</h6>
+                <h5>Rp {{ number_format($posIncome, 0, ',', '.') }}</h5>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card bg-info text-white">
+            <div class="card-body text-center">
+                <h6>PT Member</h6>
+                <h5>Rp {{ number_format($ptMemberIncome, 0, ',', '.') }}</h5>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card bg-secondary text-white">
+            <div class="card-body text-center">
+                <h6>Membership</h6>
+                <h5>Rp {{ number_format($membershipIncome, 0, ',', '.') }}</h5>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card bg-warning text-white">
+            <div class="card-body text-center">
+                <h6>Daily User</h6>
+                <h5>Rp {{ number_format($dailyUserIncome, 0, ',', '.') }}</h5>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
         <div class="card bg-success text-white">
             <div class="card-body text-center">
-                <h6>Pemasukan</h6>
+                <h6>Total Income</h6>
                 <h4>Rp {{ number_format($totalIncome, 0, ',', '.') }}</h4>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-2">
         <div class="card bg-danger text-white">
             <div class="card-body text-center">
-                <h6>Pengeluaran</h6>
+                <h6>Expense</h6>
                 <h4>Rp {{ number_format($totalExpenses, 0, ',', '.') }}</h4>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card bg-info text-white">
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card bg-{{ $netProfit >= 0 ? 'success' : 'danger' }} text-white">
             <div class="card-body text-center">
                 <h6>Laba Bersih</h6>
-                <h4>Rp {{ number_format($netProfit, 0, ',', '.') }}</h4>
+                <h3>Rp {{ number_format($netProfit, 0, ',', '.') }}</h3>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-6">
         <div class="card bg-warning text-white">
             <div class="card-body text-center">
                 <h6>Margin</h6>
-                <h4>{{ $totalIncome > 0 ? number_format(($netProfit / $totalIncome) * 100, 1) : 0 }}%</h4>
+                <h3>{{ $totalIncome > 0 ? number_format(($netProfit / $totalIncome) * 100, 1) : 0 }}%</h3>
             </div>
         </div>
     </div>
