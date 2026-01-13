@@ -32,9 +32,10 @@ class ReportController extends Controller
         $staffId = $request->get('staff_id');
         $paymentMethod = $request->get('payment_method');
         
-        // POS Transactions
+        // POS Transactions berdasarkan transaction_date
         $transactions = Transaction::with(['user', 'details.product'])
-            ->whereBetween('created_at', [$startDate, $endDate])
+            ->whereNotNull('transaction_date')
+            ->whereBetween('transaction_date', [$startDate, $endDate])
             ->where('status', 'completed')
             ->when($staffId, function($query, $staffId) {
                 return $query->where('user_id', $staffId);
@@ -42,10 +43,11 @@ class ReportController extends Controller
             ->when($paymentMethod, function($query, $paymentMethod) {
                 return $query->where('payment_method', $paymentMethod);
             })
-            ->latest()
+            ->latest('transaction_date')
             ->paginate(15);
             
-        $totalPosSales = Transaction::whereBetween('created_at', [$startDate, $endDate])
+        $totalPosSales = Transaction::whereNotNull('transaction_date')
+            ->whereBetween('transaction_date', [$startDate, $endDate])
             ->where('status', 'completed')
             ->when($staffId, function($query, $staffId) {
                 return $query->where('user_id', $staffId);

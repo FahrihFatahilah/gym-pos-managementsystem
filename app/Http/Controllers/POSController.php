@@ -31,7 +31,8 @@ class POSController extends Controller
             'items.*.product_id' => 'required|exists:products,id',
             'items.*.quantity' => 'required|integer|min:1',
             'payment_method' => 'required|in:cash,qris,transfer',
-            'total_amount' => 'required|numeric|min:0'
+            'total_amount' => 'required|numeric|min:0',
+            'transaction_date' => 'required|date'
         ]);
 
         DB::beginTransaction();
@@ -43,7 +44,8 @@ class POSController extends Controller
                 'user_id' => auth()->id(),
                 'total_amount' => $request->total_amount,
                 'payment_method' => $request->payment_method,
-                'status' => 'completed'
+                'status' => 'completed',
+                'transaction_date' => $request->transaction_date
             ]);
 
             $totalCalculated = 0;

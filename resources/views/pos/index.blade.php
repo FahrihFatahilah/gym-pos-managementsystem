@@ -123,6 +123,12 @@
                     </select>
                 </div>
                 
+                <!-- Transaction Date -->
+                <div class="mb-3">
+                    <label class="form-label">Tanggal Transaksi</label>
+                    <input type="date" class="form-control" id="transactionDate" value="{{ date('Y-m-d') }}">
+                </div>
+                
                 <!-- Action Buttons -->
                 <div class="d-grid gap-2">
                     <button class="btn btn-success btn-lg" id="processPayment" disabled>
@@ -187,6 +193,7 @@ $(document).ready(function() {
         }
 
         const paymentMethod = $('#paymentMethod').val();
+        const transactionDate = $('#transactionDate').val();
         
         Swal.fire({
             title: 'Konfirmasi Pembayaran',
@@ -197,7 +204,7 @@ $(document).ready(function() {
             cancelButtonText: 'Batal'
         }).then((result) => {
             if (result.isConfirmed) {
-                processTransaction(paymentMethod);
+                processTransaction(paymentMethod, transactionDate);
             }
         });
     });
@@ -339,10 +346,11 @@ function clearCart() {
     updateCartDisplay();
 }
 
-function processTransaction(paymentMethod) {
+function processTransaction(paymentMethod, transactionDate) {
     const transactionData = {
         items: cart,
         payment_method: paymentMethod,
+        transaction_date: transactionDate,
         subtotal_amount: subtotal,
         discount_percent: discountPercent,
         discount_amount: discountAmount,

@@ -17,7 +17,8 @@ class AccountingController extends Controller
         $endDate = $request->get('end_date', Carbon::now()->endOfMonth());
         
         // Income berdasarkan transaction_date
-        $posIncome = Transaction::whereBetween('created_at', [$startDate, $endDate])
+        $posIncome = Transaction::whereNotNull('transaction_date')
+            ->whereBetween('transaction_date', [$startDate, $endDate])
             ->where('status', 'completed')
             ->sum('total_amount');
             
@@ -168,7 +169,8 @@ class AccountingController extends Controller
         $endDate = $request->get('end_date', Carbon::now()->endOfMonth());
         
         // Income breakdown berdasarkan transaction_date
-        $posIncome = Transaction::whereBetween('created_at', [$startDate, $endDate])
+        $posIncome = Transaction::whereNotNull('transaction_date')
+            ->whereBetween('transaction_date', [$startDate, $endDate])
             ->where('status', 'completed')
             ->sum('total_amount');
             

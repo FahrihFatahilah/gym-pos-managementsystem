@@ -14,11 +14,13 @@ class Transaction extends Model
         'user_id',
         'total_amount',
         'payment_method',
-        'status'
+        'status',
+        'transaction_date'
     ];
 
     protected $casts = [
-        'total_amount' => 'decimal:2'
+        'total_amount' => 'decimal:2',
+        'transaction_date' => 'date'
     ];
 
     // Relasi dengan User
