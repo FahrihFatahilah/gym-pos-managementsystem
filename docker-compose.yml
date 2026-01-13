@@ -13,14 +13,14 @@ services:
       - ./storage:/var/www/storage
       - ./public/storage:/var/www/public/storage
     environment:
-      - APP_ENV=local
-      - APP_DEBUG=true
+      - APP_ENV=production
+      - APP_DEBUG=false
       - DB_CONNECTION=mysql
       - DB_HOST=mysql
       - DB_PORT=3306
       - DB_DATABASE=gym_pos
       - DB_USERNAME=gym_user
-      - DB_PASSWORD=flxGym99_!
+      - DB_PASSWORD=gym_password
     depends_on:
       - mysql
     networks:
@@ -35,7 +35,7 @@ services:
     environment:
       - MYSQL_DATABASE=gym_pos
       - MYSQL_USER=gym_user
-      - MYSQL_PASSWORD=flxGym99_!
+      - MYSQL_PASSWORD=gym_password
       - MYSQL_ROOT_PASSWORD=root_password
     volumes:
       - mysql_data:/var/lib/mysql
