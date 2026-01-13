@@ -20,7 +20,7 @@ services:
       - DB_PORT=3306
       - DB_DATABASE=gym_pos
       - DB_USERNAME=gym_user
-      - DB_PASSWORD=gym_password
+      - DB_PASSWORD=flxGym99_!
     depends_on:
       - mysql
     networks:
@@ -35,7 +35,7 @@ services:
     environment:
       - MYSQL_DATABASE=gym_pos
       - MYSQL_USER=gym_user
-      - MYSQL_PASSWORD=gym_password
+      - MYSQL_PASSWORD=flxGym99_!
       - MYSQL_ROOT_PASSWORD=root_password
     volumes:
       - mysql_data:/var/lib/mysql
