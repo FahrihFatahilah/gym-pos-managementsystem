@@ -91,11 +91,18 @@ class MemberController extends Controller
 
         $totalPrice = $packet->price + $ptPrice;
 
+        // Map packet type to membership type
+        $membershipType = match($packet->type) {
+            'membership' => 'monthly', // Default membership packets to monthly
+            'daily' => 'daily',
+            default => 'custom' // For individual, couple, group packets
+        };
+
         // Create membership
         $membership = Membership::create([
             'member_id' => $member->id,
             'packet_id' => $packet->id,
-            'type' => $packet->type,
+            'type' => $membershipType,
             'start_date' => $request->start_date,
             'end_date' => $endDate,
             'price' => $totalPrice,
