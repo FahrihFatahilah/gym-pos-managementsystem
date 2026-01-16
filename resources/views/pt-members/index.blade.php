@@ -11,7 +11,7 @@
                         <i class="fas fa-plus"></i> Tambah Member PT
                     </a>
                 </div>
-                
+
                 <div class="card-body">
                     <!-- Search and Filter Form -->
                     <form method="GET" class="mb-3">
@@ -51,6 +51,7 @@
                         <table class="table table-bordered table-striped">
                             <thead>
                                 <tr>
+                                    <th>Id Member</th>
                                     <th>Nama</th>
                                     <th>Telepon</th>
                                     <th>Trainer</th>
@@ -64,6 +65,7 @@
                             <tbody>
                                 @forelse($ptMembers as $member)
                                 <tr>
+                                    <td>{{ $member->member_code }}</td>
                                     <td>{{ $member->name }}</td>
                                     <td>{{ $member->phone }}</td>
                                     <td>{{ $member->personalTrainer->name }}</td>
@@ -71,7 +73,7 @@
                                         @php
                                             $badgeClass = match($member->packet->type) {
                                                 'individual' => 'bg-primary text-white',
-                                                'couple' => 'bg-success text-white', 
+                                                'couple' => 'bg-success text-white',
                                                 'group' => 'bg-warning text-dark',
                                                 default => 'bg-info text-white'
                                             };
@@ -101,7 +103,7 @@
                                             <a href="{{ route('pt-members.show', $member) }}" class="btn btn-sm btn-outline-primary" title="Lihat Detail">
                                                 <i class="fas fa-eye"></i>
                                             </a>
-                                            
+
                                             @if($member->status === 'active' && $member->sessions_remaining > 0)
                                             <form action="{{ route('pt-members.use-session', $member) }}" method="POST" class="d-inline">
                                                 @csrf
@@ -110,25 +112,25 @@
                                                 </button>
                                             </form>
                                             @endif
-                                            
+
                                             @if($member->status === 'completed' || $member->sessions_remaining <= 0)
                                             <a href="{{ route('pt-members.renew', $member) }}" class="btn btn-sm btn-outline-success" title="Perpanjang">
                                                 <i class="fas fa-redo"></i>
                                             </a>
                                             @endif
-                                            
+
                                             @if($member->packet->type === 'group')
                                             <a href="{{ route('pt-members.add-member', $member) }}" class="btn btn-sm btn-outline-info" title="Tambah Member">
                                                 <i class="fas fa-user-plus"></i>
                                             </a>
                                             @endif
-                                            
+
                                             @can('update', $member)
                                             <a href="{{ route('pt-members.edit', $member) }}" class="btn btn-sm btn-outline-secondary" title="Edit">
                                                 <i class="fas fa-edit"></i>
                                             </a>
                                             @endcan
-                                            
+
                                             @if(auth()->user()->role === 'admin')
                                             <form action="{{ route('pt-members.destroy', $member) }}" method="POST" class="d-inline">
                                                 @csrf

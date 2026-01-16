@@ -8,6 +8,7 @@ use Carbon\Carbon;
 class PTMember extends Model
 {
     protected $fillable = [
+        'member_code',
         'name',
         'phone',
         'email',

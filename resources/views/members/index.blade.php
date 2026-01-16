@@ -21,8 +21,8 @@
                 <form method="GET" class="mb-4">
                     <div class="row">
                         <div class="col-md-6">
-                            <input type="text" name="search" class="form-control" 
-                                   placeholder="Cari berdasarkan nama atau nomor HP..." 
+                            <input type="text" name="search" class="form-control"
+                                   placeholder="Cari berdasarkan nama atau nomor HP..."
                                    value="{{ request('search') }}">
                         </div>
                         <div class="col-md-3">
@@ -43,6 +43,7 @@
                     <table class="table table-bordered">
                         <thead>
                             <tr>
+                                <th>Id Member</th>
                                 <th>Nama</th>
                                 <th>Phone</th>
                                 <th>Email</th>
@@ -53,6 +54,7 @@
                         <tbody>
                             @forelse($members as $member)
                                 <tr>
+                                    <td>{{ $member->member_code ?: 'Belum ada' }}</td>
                                     <td>{{ $member->name }}</td>
                                     <td>{{ $member->phone }}</td>
                                     <td>{{ $member->email ?: '-' }}</td>

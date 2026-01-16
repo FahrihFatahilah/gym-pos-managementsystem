@@ -56,6 +56,7 @@ class MemberController extends Controller
     public function store(Request $request)
     {
         $request->validate([
+            'member_code_number' => 'required|string|unique:members,member_code,NULL,id,member_code,FLX-' . $request->member_code_number,
             'name' => 'required|string|max:255',
             'phone' => 'required|string|unique:members,phone',
             'email' => 'nullable|email|unique:members,email',
@@ -79,6 +80,7 @@ class MemberController extends Controller
 
         // Create member
         $member = Member::create([
+            'member_code' => 'FLX-' . $request->member_code_number,
             'name' => $request->name,
             'phone' => $request->phone,
             'email' => $request->email,
@@ -100,6 +102,7 @@ class MemberController extends Controller
 
         // Create membership
         $membership = Membership::create([
+            'member_code' => $member->member_code,
             'member_id' => $member->id,
             'packet_id' => $packet->id,
             'type' => $membershipType,
@@ -149,14 +152,26 @@ class MemberController extends Controller
      */
     public function update(Request $request, Member $member)
     {
-        $request->validate([
+        $rules = [
             'name' => 'required|string|max:255',
             'phone' => 'required|string|unique:members,phone,' . $member->id,
             'email' => 'nullable|email|unique:members,email,' . $member->id,
             'address' => 'nullable|string'
-        ]);
+        ];
+        
+        if (!$member->member_code) {
+            $rules['member_code_number'] = 'required|string';
+        }
+        
+        $request->validate($rules);
+        
+        $updateData = $request->only(['name', 'phone', 'email', 'address']);
+        
+        if (!$member->member_code && $request->member_code_number) {
+            $updateData['member_code'] = 'FLX-' . $request->member_code_number;
+        }
 
-        $member->update($request->all());
+        $member->update($updateData);
 
         return redirect()->route('members.index')
             ->with('success', 'Member berhasil diupdate.');

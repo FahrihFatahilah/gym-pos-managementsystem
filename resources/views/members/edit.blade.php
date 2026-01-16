@@ -15,6 +15,27 @@
                     @csrf
                     @method('PUT')
                     
+                    @if(!$member->member_code)
+                    <div class="mb-3">
+                        <label for="member_code" class="form-label">ID Member <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text">FLX-</span>
+                            <input type="text" class="form-control @error('member_code') is-invalid @enderror" 
+                                   id="member_code_number" name="member_code_number" value="{{ old('member_code_number') }}" 
+                                   placeholder="Masukkan nomor" required>
+                        </div>
+                        <small class="text-muted">Format: FLX-[nomor yang Anda masukkan]</small>
+                        @error('member_code')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    @else
+                    <div class="mb-3">
+                        <label for="member_code" class="form-label">ID Member</label>
+                        <input type="text" class="form-control" value="{{ $member->member_code }}" readonly>
+                    </div>
+                    @endif
+                    
                     <div class="mb-3">
                         <label for="name" class="form-label">Nama Lengkap <span class="text-danger">*</span></label>
                         <input type="text" class="form-control @error('name') is-invalid @enderror" 

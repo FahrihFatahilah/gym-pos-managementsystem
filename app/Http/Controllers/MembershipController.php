@@ -45,6 +45,7 @@ class MembershipController extends Controller
     public function store(Request $request)
     {
         $request->validate([
+            'member_code_number' => 'required|string|unique:memberships,member_code,NULL,id,member_code,FLX-' . $request->member_code_number,
             'member_id' => 'required|exists:members,id',
             'type' => 'required|in:monthly,yearly,custom',
             'category' => 'required|in:regular,pt',
@@ -54,7 +55,10 @@ class MembershipController extends Controller
             'transaction_date' => 'required|date'
         ]);
 
-        Membership::create($request->all());
+        $membershipData = $request->all();
+        $membershipData['member_code'] = 'FLX-' . $request->member_code_number;
+        
+        Membership::create($membershipData);
         return redirect()->route('memberships.index')->with('success', 'Membership berhasil ditambahkan.');
     }
 

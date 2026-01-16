@@ -15,6 +15,20 @@
                     @csrf
                     
                     <div class="mb-3">
+                        <label for="member_code" class="form-label">ID Member <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text">FLX-</span>
+                            <input type="text" class="form-control @error('member_code') is-invalid @enderror" 
+                                   id="member_code_number" name="member_code_number" value="{{ old('member_code_number') }}" 
+                                   placeholder="Masukkan nomor" required>
+                        </div>
+                        <small class="text-muted">Format: FLX-[nomor yang Anda masukkan]</small>
+                        @error('member_code')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    
+                    <div class="mb-3">
                         <label for="member_id" class="form-label">Member <span class="text-danger">*</span></label>
                         <select class="form-select @error('member_id') is-invalid @enderror" id="member_id" name="member_id" required>
                             <option value="">Pilih Member</option>

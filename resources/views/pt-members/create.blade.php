@@ -18,6 +18,20 @@
                                 <h5>Informasi Personal</h5>
                                 
                                 <div class="form-group">
+                                    <label for="member_code">ID Member <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">FLX-</span>
+                                        <input type="text" class="form-control @error('member_code') is-invalid @enderror" 
+                                               id="member_code_number" name="member_code_number" value="{{ old('member_code_number') }}" 
+                                               placeholder="Masukkan nomor" required>
+                                    </div>
+                                    <small class="text-muted">Format: FLX-[nomor yang Anda masukkan]</small>
+                                    @error('member_code')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                
+                                <div class="form-group">
                                     <label for="name">Nama Lengkap *</label>
                                     <input type="text" class="form-control @error('name') is-invalid @enderror" 
                                            id="name" name="name" value="{{ old('name') }}" required>

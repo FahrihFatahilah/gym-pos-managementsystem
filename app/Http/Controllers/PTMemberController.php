@@ -59,6 +59,7 @@ class PTMemberController extends Controller
     public function store(Request $request)
     {
         $request->validate([
+            'member_code_number' => 'required|string|unique:p_t_members,member_code,NULL,id,member_code,FLX-' . $request->member_code_number,
             'name' => 'required|string|max:255',
             'phone' => 'required|string|unique:p_t_members,phone',
             'email' => 'nullable|email',
@@ -76,6 +77,7 @@ class PTMemberController extends Controller
         $endDate = Carbon::parse($request->start_date)->addDays($packet->duration_days);
 
         PTMember::create([
+            'member_code' => 'FLX-' . $request->member_code_number,
             'name' => $request->name,
             'phone' => $request->phone,
             'email' => $request->email,
@@ -126,23 +128,35 @@ class PTMemberController extends Controller
 
     public function update(Request $request, PTMember $ptMember)
     {
-        $request->validate([
+        $rules = [
             'name' => 'required|string|max:255',
             'phone' => 'required|string|unique:p_t_members,phone,' . $ptMember->id,
             'email' => 'nullable|email',
             'address' => 'nullable|string',
             'sessions_remaining' => 'required|integer|min:0',
             'notes' => 'nullable|string'
-        ]);
-
-        $ptMember->update([
+        ];
+        
+        if (!$ptMember->member_code) {
+            $rules['member_code_number'] = 'required|string';
+        }
+        
+        $request->validate($rules);
+        
+        $updateData = [
             'name' => $request->name,
             'phone' => $request->phone,
             'email' => $request->email,
             'address' => $request->address,
             'sessions_remaining' => $request->sessions_remaining,
             'notes' => $request->notes
-        ]);
+        ];
+        
+        if (!$ptMember->member_code && $request->member_code_number) {
+            $updateData['member_code'] = 'FLX-' . $request->member_code_number;
+        }
+
+        $ptMember->update($updateData);
 
         // Update status based on sessions and date
         $ptMember->updateStatus();
