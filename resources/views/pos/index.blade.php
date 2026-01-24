@@ -375,7 +375,7 @@ function processTransaction(paymentMethod, transactionDate) {
                     cancelButtonText: 'OK'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        window.open(`{{ url('pos/receipt') }}/${response.transaction_id}`, '_blank');
+                        window.open(`{{ url('pos/print') }}/${response.transaction_id}`, '_blank');
                     }
                 });
                 

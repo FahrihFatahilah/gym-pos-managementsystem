@@ -107,9 +107,21 @@ class POSController extends Controller
         $transaction = Transaction::with(['details.product', 'user'])
             ->findOrFail($transactionId);
 
-        $pdf = Pdf::loadView('pos.receipt', compact('transaction'));
+        $pdf = Pdf::loadView('pos.receipt', compact('transaction'))
+            ->setPaper([0, 0, 165.35, 841.89], 'portrait');
         
-        return $pdf->stream('receipt-' . $transaction->transaction_code . '.pdf');
+        return $pdf->download('receipt-' . $transaction->transaction_code . '.pdf');
+    }
+
+    /**
+     * Print thermal receipt (HTML for direct printing)
+     */
+    public function printThermal($transactionId)
+    {
+        $transaction = Transaction::with(['details.product', 'user'])
+            ->findOrFail($transactionId);
+        
+        return view('pos.thermal', compact('transaction'));
     }
 
     /**

@@ -83,7 +83,7 @@
                                                    class="btn btn-outline-info" title="Detail">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
-                                                <a href="{{ route('transactions.receipt', $transaction) }}" 
+                                                <a href="{{ route('pos.print', $transaction) }}" 
                                                    class="btn btn-outline-success" title="Print Ulang" target="_blank">
                                                     <i class="fas fa-print"></i>
                                                 </a>

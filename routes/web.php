@@ -64,6 +64,7 @@ Route::middleware(['auth', 'redirect.pt'])->group(function () {
         Route::get('/', [POSController::class, 'index'])->name('index');
         Route::post('/transaction', [POSController::class, 'processTransaction'])->name('transaction');
         Route::get('/receipt/{transaction}', [POSController::class, 'printReceipt'])->name('receipt');
+        Route::get('/print/{transaction}', [POSController::class, 'printThermal'])->name('print');
         Route::get('/search-product', [POSController::class, 'searchProduct'])->name('search-product');
         Route::get('/history', [POSController::class, 'history'])->name('history');
     });
